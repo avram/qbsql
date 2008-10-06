@@ -1,8 +1,4 @@
--- MySQL dump 10.9
---
--- Host: localhost    Database: qbsql
--- ------------------------------------------------------
--- Server version	4.1.10
+-- Tables for qbsql database
 
 --
 -- Table structure for table `tourney_players`
