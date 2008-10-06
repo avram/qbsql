@@ -1,0 +1,17 @@
+#summary How to install and use `qbsql`
+
+= Installation =
+  # Download the code from the Downloads section and unzip it somewhere accessible by your webserver.
+  # Edit the file `functions.php` as necessary. For now, the important thing is `$mysql_prefix`. Set it to something short that will represent this tournament. For example, for an intramural tournament, you might choose `im2008`. Also set the appropriate variables to match your MySQL configuration.
+  # Edit the file `structure.sql`, changing each instance of `im1` in the file (like `im1_players`) to the prefix you chose in step 2 (i.e., `im2008_players`). Use your text editor's find and replace function.
+  # Import `structure.sql` into your MySQL database, using a command like:
+{{{
+mysql -u my_username -p my_password my_database < structure.sql
+}}}
+  # You should be ready to go. Pull up the page `index.php` in your web browser. Enter the username and password from `functions.php` into the two boxes and you can start running the tournament!
+
+= Running a Tournament =
+  # Create teams
+  # Add players to teams
+  # Add matches
+  # Enjoy!
