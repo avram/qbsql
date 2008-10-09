@@ -1,23 +1,5 @@
 <?php
 /*
- * qbsql - a program for quiz bowl stats keeping
- * Copyright 2008  Avram Lyon <ajlyon+qbsql@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA  02110-1301  USA
- */
-/*
  * foot.php
  *
  * Finishes off the dirty work. This should close MySQL connections, close
@@ -31,16 +13,19 @@
     close($link);
 ?>
 <ul class="nav">
- <li><a href="index.php">Stats Home</a></li>
- <li><a href="rosters.php">Team rosters</a></li>
- <li><a href="stats_round.php">Round summaries</a></li>
- <li><a href="stats_individual.php">Individual statistics</a></li>
- <li><a href="stats_team.php">Team statistics</a></li>
+ <li><a href="index.php?t=<?=$mysql_prefix?>">Tournament Home</a></li>
+ <li><a href="rosters.php?t=<?=$mysql_prefix?>">Team rosters</a></li>
+ <li><a href="stats_round.php?t=<?=$mysql_prefix?>">Round summaries</a></li>
+ <li><a href="stats_individual.php?t=<?=$mysql_prefix?>">Individual statistics</a></li>
+ <li><a href="stats_team.php?t=<?=$mysql_prefix?>">Team statistics</a></li>
 </ul>
+<?php if ($auth) { ?>
 <ul class="nav">
- <li><a href="roster_modify.php">Add players</a></li>
- <li><a href="team_modify.php">Add teams</a></li>
- <li><a href="add_game.php">Add a game</a></li>
+ <li><a href="roster_modify.php?t=<?=$mysql_prefix?>">Add players</a></li>
+ <li><a href="team_modify.php?t=<?=$mysql_prefix?>">Add teams</a></li>
+ <li><a href="add_game.php?t=<?=$mysql_prefix?>">Add a game</a></li>
 </ul>
+<?php } ?>
+<p>Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>
 </body>
 </html>
