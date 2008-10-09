@@ -1,22 +1,4 @@
 <?php
-/*
- * qbsql - a program for quiz bowl stats keeping
- * Copyright 2008  Avram Lyon <ajlyon+qbsql@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA  02110-1301  USA
- */
 /* add_game.php
  *
  * Enter results from a game and edit extant games. 
@@ -117,7 +99,7 @@
      
      echo "
 	 <h2>Round $round, $team1 vs. $team2</h2>
-	 <form action=\"add_game.php?submit=bork\" method=\"POST\">
+	 <form action=\"add_game.php?submit=bork&t=$mysql_prefix\" method=\"POST\">
 	 <h3>Scores</h3>
 	 <p>$team1: <input type=\"text\" size=\"5\" name=\"team1_score\" />
 	 $team2: <input type=\"text\" size=\"5\" name=\"team2_score\" />
@@ -125,7 +107,7 @@
 	 <input type=\"hidden\" name=\"team1_id\" value=\"$team1_id\" />
 	 <input type=\"hidden\" name=\"team2_id\" value=\"$team2_id\" />
  	 </p>
-	 <p>Toss-ups heard: <input type=\"text\" size=\"5\" name=\"total_tuh\" /></p>
+	 <p>Toss-ups heard: <input type=\"text\" size=\"5\" name=\"total_tuh\" value=\"$tourney_game_length\" /></p>
 	 <h3>Individual scores</h3>
 	 <table>
 	  <thead>
@@ -145,7 +127,7 @@
      while(list($team1_last,$team1_first,$team1_id_num) = fetch_row($res1)){
 	 echo "<tr>
 	     <td>$team1_first $team1_last <input type=\"hidden\" name=\"team1_id_num[]\" value=\"$team1_id_num\" /></td>
-	     <td><input type=\"text\" size=\"5\" name=\"team1_tuh[]\" /></td>
+	     <td><input type=\"text\" size=\"5\" name=\"team1_tuh[]\" value=\"$tourney_game_length\" /></td>
 	     <td><input type=\"text\" size=\"5\" name=\"team1_pow[]\" /></td>
 	     <td><input type=\"text\" size=\"5\" name=\"team1_tu[]\" /></td>
 	     <td><input type=\"text\" size=\"5\" name=\"team1_neg[]\" /></td>
@@ -173,7 +155,7 @@
      while(list($team2_last,$team2_first,$team2_id_num) = fetch_row($res2)){
          echo "<tr>
              <td>$team2_first $team2_last <input type=\"hidden\" name=\"team2_id_num[]\" value=\"$team2_id_num\" /></td>
-             <td><input type=\"text\" size=\"5\" name=\"team2_tuh[]\" /></td>             
+             <td><input type=\"text\" size=\"5\" name=\"team2_tuh[]\" value=\"$tourney_game_length\" /></td>             
 	     <td><input type=\"text\" size=\"5\" name=\"team2_pow[]\" /></td>
              <td><input type=\"text\" size=\"5\" name=\"team2_tu[]\" /></td>
              <td><input type=\"text\" size=\"5\" name=\"team2_neg[]\" /></td>
@@ -211,7 +193,7 @@
  	// now we edit the requested game
  	$game_id = $_GET["edit"];
  	
- 	print "<p><form action='?delete=$game_id' method='POST'>" .
+ 	print "<p><form action='?delete=$game_id&t=$mysql_prefix' method='POST'>" .
  			"Confirm delete: <input type='checkbox' name='confirm' value='yes' />" .
  			"<input type='submit' value='Delete this round' /></form></p>\n";
  	
@@ -250,7 +232,7 @@
  	
  	print "<h2>Editing Round $round_id: $team1_name vs. $team2_name</h2>\n";
 ?>
-  <form action="?modify=<?=$game_id?>" method="POST">
+    <form action="?modify=<?=$game_id?>&t=<?=$mysql_prefix?>" method="POST">
    <h3>Points</h3>
    <p><?=$team1_name?>: <input type="text" name="team1_score" size="5" value="<?=$team1_score?>" />
       <?=$team2_name?>: <input type="text" name="team2_score" size="5" value="<?=$team2_score?>" /></p>
@@ -322,7 +304,7 @@
  	
  } else {				// show the team picker
 ?>
-   <form action="" method="GET">
+    <form action="" method="GET">
     <h2>Select teams</h2>
     <p>
     <select name="team1">
@@ -345,6 +327,7 @@
       </select>
       Round: 
       <input type="text" size="5" name="round" />
+      <input type="hidden" value="<?=$mysql_prefix?>" name="t" />
       <input type="submit" value="Continue" />
      </p>
      </form>

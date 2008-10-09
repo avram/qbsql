@@ -1,45 +1,9 @@
 <?php
 /*
- * qbsql - a program for quiz bowl stats keeping
- * Copyright 2008  Avram Lyon <ajlyon+qbsql@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA  02110-1301  USA
- */
-/*
- * Settings & functions
+ * Functions
  */
 
-// Tournament settings
-// l/p for modifying tournament info
-$tourney_un = "quizbowl";
-$tourney_pass = "password";
-$tourney_lock = 0; // set to 1 to prevent modifications
-
-// These three lines should be changed to reflect your MySQL configuration.
-$mysql_host = ":/tmp/mysql.sock";
-$mysql_username = "mysql_un";
-$mysql_pass = "mysql_pw";
-$mysql_db = "qbsql";
-// the prefix must be unique within the database
-$mysql_prefix = "im1";
-
-// set mysql library in use (mysql or mysqli)
-//$mysql_library = "mysqli";
-$mysql_library = "mysql";
-
-// DO NOT EDIT BENEATH THIS COMMENT
+require "config.php";
 
 // wrappers
 function connect($host, $username, $pass, $db) {

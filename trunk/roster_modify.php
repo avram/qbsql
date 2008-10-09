@@ -1,22 +1,4 @@
 <?php
-/*
- * qbsql - a program for quiz bowl stats keeping
- * Copyright 2008  Avram Lyon <ajlyon+qbsql@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA  02110-1301  USA
- */
 /* roster_modify.php
  * 
  * Handle the creation and maintenance of rosters.
@@ -44,11 +26,11 @@
  ?>
 
  <h2>Editing <?=$fn?> <?=$ln?>, for <?=$team?></h2>
- <form action="?delete=<?=$pid?>" method="post">
+ <form action="?delete=<?=$pid?>&t=<?=$mysql_prefix?>" method="post">
  <p id="delete"><input type="checkbox" name="confirm" value="yes" />
  	<input type="submit" value="Delete" /></p>
  </form>
- <form action="?modify=<?=$pid?>" method="post">
+ <form action="?modify=<?=$pid?>&t=<?=$mysql_prefix?>" method="post">
  <p>First Name: <input type="text" name="p_fn" size="12" value="<?=$fn?>" /></p>
  <p>Last Name: <input type="text" name="p_ln" size="12" value="<?=$ln?>" /></p>
  <p><input type="submit" value="Apply Changes" /></p>
@@ -74,7 +56,7 @@
  } else { 
 ?>
     <p class="form">
-     <form action="?action=add_players" method="POST">
+     <form action="?action=add_players&t=<?=$mysql_prefix?>" method="POST">
      Team: <select name="team_id">
 <?php
 	// grab the id of a team that they might have selected
