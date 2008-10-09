@@ -3,6 +3,3 @@
     * through popupHelp()
  - a way to edit every sort of record
  - A way to cleanly export a tournament and make its results static
- - A way to reset or create new tournaments
-    * using 'tournaments' table
-    * need a way to 
