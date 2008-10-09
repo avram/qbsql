@@ -27,7 +27,8 @@
                             LEFT JOIN {$mysql_prefix}_rounds_players 
                                 ON {$mysql_prefix}_rounds_players.player_id = {$mysql_prefix}_players.id
                         WHERE 
-			    "."$mysql_prefix"."_teams.id=$teamid
+                            "."$mysql_prefix"."_players.team = $teamid
+                            AND {$mysql_prefix}_teams.id = {$mysql_prefix}_players.team 
 			GROUP BY {$mysql_prefix}_players.id
 			ORDER BY pptuh DESC");
      table($res1,array("Name","15","10","-5","Pts.","PPTUH","P/N","TUH"),8,TRUE,FALSE,"stats");
