@@ -11,7 +11,13 @@ mysql -u my_username -p my_password my_database < structure.sql
   # Create a new tournament. The master password is the one you set in `config.php`
 
 = Creating Tournaments =
-  # -----
+  # Click the "admin" link on the tournament list, which should bring you to the "Manage tournaments" page.
+  # _Name_: A name for the tournament. This will show up in the tournament list and on its front page.
+  # _Prefix_: This should be a short, lowercase name for the tournament. Letters and numbers *only*, no spaces. The first character must be a letter.
+  # _Description_: This should be a prose description of the tournament.
+  # _Default game length_: This is the default number of tossups in a round. This can be overridden at any point.
+  # _Tournament username_, _Tournament password_: The username and password you will use to log in and modify tournament stats.
+  # _Master username_, _Master password_: This is the master username and password that you set in `config.php`.
 
 = Running a Tournament =
   # Create teams
