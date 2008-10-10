@@ -135,9 +135,7 @@
 	 $l++;
      }
      echo "</tbody>
-	 </table>
 	 <input type=\"hidden\" name=\"team1_size\" value=\"$l\" />
-         <table>
           <thead>
            <tr>
             <th colspan=\"5\">$team2</th>
@@ -170,13 +168,40 @@
     mysql_free_result($res1);
     mysql_free_result($res2);
  } else if ($_GET["submit"]=="bork") {
+     // check data integrity
+     $integrity = (is_numeric($_POST["team1_id"]) && is_numeric($_POST["team2_id"])
+          && is_numeric($_POST["team1_score"]) && is_numeric($_POST["team2_score"])
+              && is_numeric($_POST["total_tuh"]) && is_numeric($_POST["round"]));
+     if (!$integrity)
+         die("Invalid scores. Go back and try again.");
+
+     // check logical validity
+     // distinct teams, no previous games this round
+     if($_POST["team1_id"] != $_POST["team2_id"]) {
+         $query = "SELECT COUNT(*) FROM {$mysql_prefix}_rounds
+             WHERE (team1='$_POST[team1_id]' OR team2='$_POST[team2_id]') AND id='$_POST[round]'";
+         $res = query($query);
+         list($count) = fetch_row($res);
+         if($count == 0)
+             $logic = true;
+         else
+             die("One or more of the teams already has a game entered for this round.");
+     } else
+         die("The two teams must be distinct.");
+
+
      // add to table "rounds"
-     $rnd_query="INSERT INTO "."$mysql_prefix"."_rounds SET team1=\"" . $_POST["team1_id"] . "\", team2=\"" . $_POST["team2_id"] . "\", score1=\"" . $_POST["team1_score"] . "\", score2=\"" . $_POST["team2_score"] . "\", tu_heard=\"" .$_POST["total_tuh"] . "\", id=\"" . $_POST["round"] . "\"";
+     $rnd_query="INSERT INTO {$mysql_prefix}_rounds SET team1='$_POST[team1_id]',
+                    team2='$_POST[team2_id]', score1='$_POST[team1_score]',
+                    score2='$_POST[team2_score]', tu_heard='$_POST[total_tuh]',
+                    id='$_POST[round]'";
      query($rnd_query) or die("Choked adding round info: $rnd_query, probably lost individual stats");
-     $game_id = mysql_insert_id(); 	// FIXME wrap this call 
+
+     $game_id = mysql_insert_id(); 	
 
      $team1_num_players = $_POST["team1_size"];
      $team2_num_players = $_POST["team2_size"];
+     
      // add to "rounds_players"
      for($i = 0;$i<$team1_num_players;$i++){ 
 	 	$id = $_POST["team1_id_num"][$i];
