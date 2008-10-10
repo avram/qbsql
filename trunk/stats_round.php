@@ -15,10 +15,10 @@
  $res1 = query("SELECT "."$mysql_prefix"."_rounds.id,
 			    IF(score1>=score2,t1.full_name,t2.full_name) AS name1,
 			    IF(score1>=score2,score1,score2) AS winscore,
-			    IF(score1>=score2,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc) AS winconv,
+			    FORMAT(IF(score1>=score2,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc),2) AS winconv,
 			    IF(score1>=score2,t2.full_name,t1.full_name) AS name2,
 			    IF(score1>=score2,score2,score1) AS losescore,
-			    IF(score1>=score2,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc) AS loseconv,
+			    FORMAT(IF(score1>=score2,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc),2) AS loseconv,
 			    ABS(score1-score2)$edit_query
 			FROM
                         (
