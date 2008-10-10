@@ -84,7 +84,7 @@ function check_auth($username, $pass) {
 }
 
 /* table (MySQL result, array/result fields, int cols, 
- *                      bool head, bool MySQL_fields, string class) 
+ *                      bool head, bool MySQL_fields, string class, array options) 
  * 
  * Prints out the result of a MySQL query as a well-formed HTML table, 
  * optionally using field names in the header. A table class is supported
@@ -97,11 +97,17 @@ function check_auth($username, $pass) {
  * $head    - yes/no header
  * $names   - yes = MySQL fields, no=array
  * $class   - CSS class attribute
+ * $options - array of additional options
+ *      "ranked"
  */
-function table($result, $fields, $columns, $head, $names, $class) {
+function table($result, $fields, $columns, $head, $names, $class, $options) {
+    // should we show row numbers (ranks)? 
+    $ranks = (array_key_exists("ranked",$options) || in_array("ranked",$options));
     print "<table class=\"$class\">\n";
     if ($head) {
         print "\t<thead>\n\t<tr>\n";
+        if ($ranks)
+           print "\t\t<th>Rank</th>\n"; 
         for ($i = 0; $i < $columns; $i++) {
             print "\t\t<th>";
             if ($names)
@@ -112,8 +118,11 @@ function table($result, $fields, $columns, $head, $names, $class) {
         }
     print "\t</tr>\t</thead>\n<tbody>\n";
     }
+    $i = 0;
     while ($line = fetch_assoc($result)) {
         print "\t<tr>\n";
+        if ($ranks)
+            print "\t\t<td>".++$i."</td>\n";
         foreach ($line as $col_value) {
             print "\t\t<td>$col_value</td>\n";
         }

@@ -38,7 +38,7 @@
                              "."$mysql_prefix"."_teams
 				WHERE "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_tut.team_id
 				    AND "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_teams.id ORDER BY pct DESC, pptuh DESC") or die(mysql_error());
-     table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","BConv"),11,TRUE,FALSE,"stats");
+     table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","BConv"),11,TRUE,FALSE,"stats",array("ranked"));
      free_result($res1);
  
  require "foot.php";			// finish off page
