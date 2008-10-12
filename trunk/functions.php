@@ -5,7 +5,7 @@
 
 require "config.php";
 
-// wrappers
+// database wrappers
 function connect($host, $username, $pass, $db) {
     global $mysql_library;
     if ($mysql_library=="mysqli")
@@ -52,6 +52,8 @@ function fetch_row($result) {
 }
 
 function free_result($result) {
+    if(!isset($result))
+        return false;
     global $mysql_library;
     if ($mysql_library=="mysqli")
       return mysqli_free_result($result);
@@ -138,6 +140,37 @@ function table($result, $fields, $columns, $head, $names, $class, $options) {
 /* from James Michael-Hill, June 2003 for UCDB at Grinnell College */
 function popupHelp($topic){
     return "<sup> <a href='#' onClick=\"javaScript:window.open('help.php?topic=$topic','UCDB_Help','height=500,width=500,scrollbars,resizable,')\">[?]</a> </sup>\n";
+}
+
+/* creates a nice little warning box with the given text 
+ warning("That's incorrect input");
+ warning("You need to create teams first.", "Go to 'Add Teams'", "add_teams.php"); */
+function warning() {
+    global $mysql_prefix;
+    $args = func_get_args();
+    $text = $args[0];
+    if(count($args) == 3) {
+        $target = $args[2]."?t=".$mysql_prefix;
+        $redirect_text = $args[1];
+        $redirect = "<p class='redirect'><a href='$target'>$redirect_text</a></p>\n";
+    }
+    $warning =  <<<EOP
+<div class="warning">
+ <p>$text</p>
+ $redirect
+</div>
+EOP;
+    print $warning;
+}
+
+/* creates a nice little message box with the given text */
+function message($text) {
+   $box =  <<<EOP
+<div class="message">
+ <p>$text</p>
+</div>
+EOP;
+    print $box;
 }
 
 ?>

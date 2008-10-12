@@ -3,3 +3,9 @@
     * through popupHelp()
  - a way to edit every sort of record
  - A way to cleanly export a tournament and make its results static
+ - player, team, and game details
+ - editable tournament options
+ - data validation, prevention of injection attacks
+
+Longer term
+ - tournament design tools (scheduling, etc.)

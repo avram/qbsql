@@ -11,6 +11,7 @@
  require "head.php";			// Generate header as appropriate
 
  $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";
+ $detail = ", CONCAT(\"<a href='game_detail.php?game=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Detail</a>\")";
  
  $res1 = query("SELECT "."$mysql_prefix"."_rounds.id,
 			    IF(score1>=score2,t1.full_name,t2.full_name) AS name1,
@@ -19,7 +20,7 @@
 			    IF(score1>=score2,t2.full_name,t1.full_name) AS name2,
 			    IF(score1>=score2,score2,score1) AS losescore,
 			    FORMAT(IF(score1>=score2,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc),2) AS loseconv,
-			    ABS(score1-score2)$edit_query
+			    ABS(score1-score2) $detail $edit_query
 			FROM
                         (
 		    select SUM(powers*15+tossups*10+negs*(-5)) as tup,
@@ -46,7 +47,7 @@
 			    AND "."$mysql_prefix"."_tut2.round_id="."$mysql_prefix"."_rounds.id
 			    AND "."$mysql_prefix"."_tut2.team_id=t2.id
 			ORDER BY "."$mysql_prefix"."_rounds.id ASC") or die(mysql_error());
-     table($res1,array("Round","W","","BConv","L","","BConv","Margin"),8,TRUE,FALSE,"stats");
+     table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array());
      free_result($res1);
  
  require "foot.php";			// finish off page
