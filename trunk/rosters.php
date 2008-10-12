@@ -20,8 +20,9 @@
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,tossups,0)) AS tu,
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,negs,0)) AS neg,
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0)*15+IF("."$mysql_prefix"."_players.id=player_id,tossups,0)*10-IF("."$mysql_prefix"."_players.id=player_id,negs,0)*5) as tp,
-			    SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0)*15+IF("."$mysql_prefix"."_players.id=player_id,tossups,0)*10-IF("."$mysql_prefix"."_players.id=player_id,negs,0)*5)/SUM(IF("."$mysql_prefix"."_players.id=player_id,tu_heard,0)) AS pptuh,
-			    SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0))/SUM(IF("."$mysql_prefix"."_players.id=player_id,negs,0)) as pn,
+			    FORMAT(SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0)*15+IF("."$mysql_prefix"."_players.id=player_id,tossups,0)*10-IF("."$mysql_prefix"."_players.id=player_id,negs,0)*5)/SUM(IF("."$mysql_prefix"."_players.id=player_id,tu_heard,0)),2) AS pptuh,
+			    FORMAT(SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0)*15+IF("."$mysql_prefix"."_players.id=player_id,tossups,0)*10-IF("."$mysql_prefix"."_players.id=player_id,negs,0)*5)/SUM(IF("."$mysql_prefix"."_players.id=player_id,tu_heard,0))*{$tourney_game_length},2) AS ppg,
+			    FORMAT(SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0))/SUM(IF("."$mysql_prefix"."_players.id=player_id,negs,0)),2) as pn,
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,tu_heard,0)) AS tuh $edit_query
                             FROM "."$mysql_prefix"."_teams, "."$mysql_prefix"."_players
                             LEFT JOIN {$mysql_prefix}_rounds_players 
@@ -31,9 +32,13 @@
                             AND {$mysql_prefix}_teams.id = {$mysql_prefix}_players.team 
 			GROUP BY {$mysql_prefix}_players.id
 			ORDER BY pptuh DESC") or die(mysql_error());
-     table($res1,array("Name","15","10","-5","Pts.","PPTUH","P/N","TUH"),8,TRUE,FALSE,"stats",array());
+     table($res1,array("Name","15","10","-5","Pts.","PPTUH","PPG","P/N","TUH"),9,TRUE,FALSE,"stats",array());
  }
      free_result($res1);
+?>
+    <p><strong>Note:</strong> The PPG above is calculated on the basis of tossups heard, 
+not number of games played. (<?=$tourney_game_length?> tossups per game)</p>
+<?php
  
  require "foot.php";			// finish off page
 ?>
