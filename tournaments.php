@@ -7,6 +7,7 @@
     $link = connect($mysql_host,$mysql_username,$mysql_pass,$mysql_db) or die('Failed to connect to DB server.');
 
 $title = "Tournament List";
+$tourney_name = $title;
 require "head.php";			// Generate header as appropriate
 
 print "<ul>\n";
@@ -16,7 +17,7 @@ while (list($name, $prefix, $lock, $desc)=fetch_row($res)) {
 }
 print "</ul>";
 ?>
-<p><a href="tournament_modify.php">[admin]</a></p>
+<p><a href="tournament_modify.php">[New Tournament]</a></p>
 <p>Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>
 </body>
 </html>

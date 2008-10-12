@@ -21,7 +21,7 @@
 	    $i++;
 	 }
      }
-     echo "<p>$i teams added without incident.</p>";
+     message("$i team(s) added without incident.");
  } else { 
 ?>
      <form action="?action=add_teams&t=<?=$mysql_prefix?>" method="POST">

@@ -26,7 +26,7 @@
          // We've checked all the input.
          query("INSERT INTO tournaments SET name = '$_POST[name]',
                     prefix = '$_POST[prefix]', username = '$_POST[un]',
-                    password = '$_POST[pw]', game_length = '$_post[len]',
+                    password = '$_POST[pw]', game_length = '$_POST[len]',
                     description = '$_POST[desc]'") or die(mysql_error());
          $prefix = $_POST["prefix"];
          $query = <<<CREATE
@@ -93,25 +93,44 @@ CREATE;
 RED;
      }
      else
-         print "Double-check and try again.";
+         warning("An error occured. Double-check your input and try again.");
  }
 
 
 ?>
-     <form action="?action=add" method="POST">
-     <p class="form">
-      Name: <input type="text" size="30" name="name" /><br />
-      Prefix: <input type="text" size="30" name="prefix" /> (letters and numbers only)<br />
-      Description: <textarea rows="4" cols="30" name="desc"></textarea><br />
-      Default Game Length: <input type="text" size="4" name="len" value="20" /> (tossups per round)<br />
-      Tournament username: <input type="text" size="30" name="un" /><br />
-      Tournament password: <input type="password" size="30" name="pw" /><br />
-      Confirm password: <input type="password" size="30" name="pw2" /><br />
-      Adding tournaments requires the master username and password: <br />
-      Master username: <input type="text" size="30" name="master_un" /><br />
-      Master password: <input type="password" size="30" name="master_pw" /><br />
-      <input type="submit" value="Add tournament" />
-     </p>
+     <form id="newtourney" action="?action=add" method="POST">
+     <fieldset id="basic">
+     <legend>Tournament Settings</legend>
+     <ol>
+      <li><label for="name">Name: </label>
+      <input type="text" size="30" name="name" tabindex="1" id="name" /></li>
+      <li><label for="prefix">Prefix: </label>
+      <input type="text" size="30" name="prefix" tabindex="2" id="name" />
+      <p>letters and numbers only</p></li>
+      <li><label for="desc">Description: </label>
+      <textarea rows="4" cols="30" name="desc" tabindex="3" id="desc"></textarea></li>
+      <li><label for="len">Default game length: </label>
+      <input type="text" size="4" name="len" value="20" tabindex="4" id="len" />
+      <p>tossups per round</p></li>
+      <li><label for="un">Tournament username: </label>
+      <input type="text" size="30" name="un" tabindex="5" id="un" /></li>
+      <li><label for="pw">Tournament password: </label>
+      <input type="password" size="30" name="pw" tabindex="6" id="pw" /></li>
+      <li><label for="pw2">Confirm password: </label>
+      <input type="password" size="30" name="pw2" tabindex="7" id="pw2" /></li>
+      </ol>
+      </fieldset>
+      <fieldset id="authentication">
+      <legend>Authentication</legend>
+      <ol>
+      <li><label for="master_un">Master username: </label>
+      <input type="text" size="30" name="master_un" id="master_un" /></li>
+      <li><label for="master_pw">Master password: </label>
+      <input type="password" size="30" name="master_pw" id="master_pw" /></li>
+      </ol>
+      </fieldset>
+      <p><input type="submit" value="Add tournament" /></p>
+     </form>
 <?php
 ?>
 </body>

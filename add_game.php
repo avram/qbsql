@@ -28,7 +28,7 @@
  		$indiv_del = "DELETE FROM {$mysql_prefix}_rounds_players WHERE game_id='$_GET[delete]'";
  		query($round_del) or die("Failed to delete round data; db should be untouched: ".mysql_error());
  		query($indiv_del) or die("Failed to delete indiv data; there may be orphaned rows in rounds_players: ".mysql_error());  
- 		print "<p class='message'>Deleted round $round, $team1 vs. $team2</p>";
+ 		message("Deleted round $round, $team1 vs. $team2");
  	} else {
  		$_GET["edit"] = $_GET["delete"];
  	}
@@ -213,7 +213,7 @@
          $play_query =  "INSERT INTO "."$mysql_prefix"."_rounds_players SET player_id=\"$id\" , team_id=\"$_POST[team2_id]\", powers=\"".$_POST["team2_pow"][$i]."\", tossups=\"".$_POST["team2_tu"][$i]."\", negs=\"".$_POST["team2_neg"][$i]."\", round_id=\"".$_POST["round"]."\", tu_heard=\"".$_POST["team2_tuh"][$i]."\", game_id=\"$game_id\"";
          query($play_query) or die("Choked adding records: $play_query");
      } 
-     echo "<p>The round was added successfully.</p>";
+     message("The round was added successfully.");
  } else if(isset($_GET["edit"]) && is_numeric($_GET["edit"])) {
  	// now we edit the requested game
  	$game_id = $_GET["edit"];
@@ -328,7 +328,16 @@
   </form>";
  	
  } else {				// show the team picker
+ // see if we have any teams
+ $tm_res = query("SELECT COUNT(*) FROM {$mysql_prefix}_teams");
+ list($num_teams) = fetch_row($tm_res);
+ if($num_teams == 0) {
 ?>
+     <div class="warning">
+      <p>There are no teams in the tournament. You must add teams before adding games.</p>
+      <p class="redirect"><a href="team_modify.php?t=<?=$mysql_prefix?>">Go to "Add Teams"</a></p>
+      </div>
+<?php } else { ?>
     <form action="" method="GET">
     <h2>Select teams</h2>
     <p>
@@ -354,10 +363,11 @@
       <input type="text" size="5" name="round" />
       <input type="hidden" value="<?=$mysql_prefix?>" name="t" />
       <input type="submit" value="Continue" />
+
      </p>
      </form>
 <?php
- }
+ }}
 
  require "foot.php";			// finish off page
 

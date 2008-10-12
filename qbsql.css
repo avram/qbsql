@@ -13,15 +13,9 @@ body {
 
 table {
     background-color: white;
+    }
 
-}
-/*
-table th {
-    background-color: black;
-    color: #ffffff;
-    border: 0pt;
-}
-*/
+
 
 table td {
     color: black;
@@ -30,9 +24,122 @@ table td {
     border-style: solid; 
 }
 
+table tr.total td {
+    font-weight: bold;
+    background: #ccd;
+    border-bottom: thin black solid;
+}
+
+thead tr td {
+    background: #ccd;
+    font-weight: bold;
+}
+
+tr.empty td {
+    background-color: white;
+    border: none;
+}
+
+table thead tr.winner th {
+    background-color: #cc0;
+}
+
+table thead tr.loser th {
+    background-color: #44c;
+}
+
+table thead tr.draw th {
+    background-color: green;
+}
+
+table thead th.team {
+    font-size: 140%;
+}
+
+h4.headline {
+    background: #eef;
+    font-size: 60%;
+    margin: 0;
+    padding: 0;
+}
+
+div.warning {
+    background: url("warning.png");
+    background-repeat: no-repeat;
+    padding: 0px 0px 0px 45px;
+    background-color: #eee;
+    width: 400px;
+    border: thick red solid;
+    margin: 2px;
+    font-size: 80%;
+}
+
+div.warning p.redirect {
+    font-weight: bold;
+}
+
+div.message {
+    background: url("info.png");
+    background-repeat: no-repeat;
+    padding: 0px 0px 0px 45px;
+    background-color: #eee;
+    width: 400px;
+    height: 40px; 
+    border: thick green solid;
+    margin: 2px;
+    font-size: 80%;
+}
+
 ul.nav {
     background-color: #dddddd;
 }
+
+/* forms styles */
+form#newtourney {
+width: 600px;
+}
+fieldset {  
+float: left;  
+clear: both;  
+width: 100%;  
+margin: 0 0 1.5em 0;  
+padding: 0;  
+border: 1px solid #BFBAB0;  
+background-color: #F2EFE9; 
+}
+legend {  
+margin-left: 1em;  
+color: #000000;  
+font-weight: bold;
+padding: 0;
+}
+fieldset ol {  
+padding: 1em 1em 0 1em;  
+list-style: none;
+}
+fieldset li {  
+float: left;  
+clear: left;  
+width: 100%;  
+padding-bottom: 1em;
+}
+fieldset li p {
+font-size: 8pt;
+color: green;
+padding: 0;
+display: inline;
+}
+fieldset.submit {  
+border-style: none;
+}
+label {  
+float: left;  
+width: 10em;  
+margin-right: 1em;
+font-size: 70%;
+text-align: right;
+}
+
 
 /* style thanks to http://robertdenton.org/reference/css-tables-tutorial.html */
 table
@@ -62,3 +169,4 @@ table thead th
     border-bottom: 2px #fff solid;
     font-size: 12px;
     font-weight: bold;}
+    

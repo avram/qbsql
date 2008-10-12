@@ -20,4 +20,5 @@
  <link rel="stylesheet" type="text/css" href="qbsql.css" />
 </head>
 <body>
+ <h4 class="headline"><strong><?=$tourney_name?></strong> | <a href="tournaments.php">Other Tournaments</a></h4>
  <h1><?php echo $title ?></h1>

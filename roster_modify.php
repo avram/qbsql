@@ -13,7 +13,7 @@
 
  // try to apply deletes
  if(isset($_GET["delete"]) && is_numeric($_GET["delete"]) && $_POST["confirm"] == "yes") {
- 	print "Delete not yet implemented.";
+ 	warning("Delete not yet implemented.");
  }
 
  if ((isset($_GET["edit"]) && is_numeric($_GET["edit"])) || 
@@ -52,9 +52,15 @@
 	     $i++;
 	 } 
      }
-     echo "<p>$i players added without incident.</p>";
- } else { 
-?>
+     message("$i player(s) added without incident.");
+ } else {  // We present to form to add new players.
+  // see if we have any teams
+ $tm_res = query("SELECT COUNT(*) FROM {$mysql_prefix}_teams");
+ list($num_teams) = fetch_row($tm_res);
+  if($num_teams == 0) {
+    warning("There are no teams in the tournament. You must add teams before adding players.",
+            "Go to \"Add Teams\"", "team_modify.php");
+    } else { ?>
     <p class="form">
      <form action="?action=add_players&t=<?=$mysql_prefix?>" method="POST">
      Team: <select name="team_id">
@@ -98,6 +104,7 @@
       <input type="submit" value="Add players" />
      </p>
 <?php
+}
  }
 
  require "foot.php";			// finish off page
