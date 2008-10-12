@@ -1,0 +1,49 @@
+********************************
+** Introduction               **
+********************************
+
+This is a project to develop a good online stats program for running quizbowl tournaments.
+
+It works effectively, but it still requires some technical knowledge.
+
+If you have questions or want to help out, see the project page for information:
+http://code.google.com/p/qbsql/
+
+Cool things you can do with qbsql:
+
+    * Upload round results from multiple locations
+    * Show live-updating results
+    * Do stats without a Windows machine 
+
+Where we're going:
+
+This is a project that could use some work. If you like to code and like to play quiz bowl, this could use some improvements, like:
+
+    * A way to cleanly export a tournament and make its results static
+    * Something like a round-robin and bracket generator, so that qbsql could know what matches should be played, and to make tournament directors' lives easier.
+    * Probably lots more!
+
+**********************************
+** How to install and use qbsql **
+**********************************
+
+Installation
+
+   1. Download the code from the Downloads section and unzip it somewhere accessible by your webserver.
+   2. Edit the file config.php as necessary. 
+   3. Import structure.sql into your MySQL database, using a command like:
+
+      mysql -u my_username -p my_password my_database < structure.sql
+
+   5. Pull up the page index.php in your web browser. You should be redirected to the Tournament List.
+   6. Create a new tournament. The master password is the one you set in config.php
+
+Creating Tournaments
+   1. -----
+
+Running a Tournament
+
+   1. Create teams
+   2. Add players to teams
+   3. Add matches
+   4. Enjoy! 
