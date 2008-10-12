@@ -13,7 +13,32 @@
 
  // try to apply deletes
  if(isset($_GET["delete"]) && is_numeric($_GET["delete"]) && $_POST["confirm"] == "yes") {
- 	warning("Delete not yet implemented.");
+    $pid = $_GET["delete"];
+ 	$player_query = "SELECT p.first_name, p.last_name, t.full_name, COUNT(rp.game_id)
+ 	              FROM {$mysql_prefix}_teams AS t,
+ 	                  {$mysql_prefix}_players AS p
+ 	              LEFT JOIN
+ 	                  {$mysql_prefix}_rounds_players AS rp
+ 	                  ON rp.player_id = p.id 
+ 	              WHERE p.team = t.id AND p.id='$pid'
+ 	              GROUP BY p.id
+ 	              LIMIT 1";
+    $p_res = query($player_query) or die(mysql_error());
+    list($fn, $ln, $team, $rnd_ct) = fetch_row($p_res);
+    if($rnd_ct > 0) { // We refuse to delete if there are records that would be orphaned.
+        warning("Cannot delete player <b>$fn $ln</b> ($team). This player has game records, which must be deleted first.",
+                "Go to \"Round summaries\"","stats_round.php");
+    } elseif (isset($fn)) {
+        $del_query = "DELETE FROM {$mysql_prefix}_players WHERE id = '$pid' LIMIT 1";
+        $del_res = query($del_query);
+        if($del_res) {
+            message("Player <b>$fn $ln</b> ($team) deleted.");
+        } else {
+            warning("Delete failed for unknown reasons.");
+        }
+    } else {
+ 	    warning("Cannot delete. Player not found.");
+    }
  }
 
  if ((isset($_GET["edit"]) && is_numeric($_GET["edit"])) || 
