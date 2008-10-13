@@ -69,28 +69,31 @@ if($draw) {
 }
 
 // round data
-$tm_query = "SELECT SUM(rp1.tossups),
-                SUM(rp1.negs),
-                SUM(rp1.powers),
-                FORMAT(($winner[3]-SUM(10*rp1.tossups+15*rp1.powers-5*rp1.negs))/SUM(rp1.tossups+rp1.powers),2),
-                SUM(rp1.tu_heard),
-                SUM(10*rp1.tossups+15*rp1.powers-5*rp1.negs),
-                FORMAT(SUM(rp1.powers)/SUM(rp1.negs),2),
-                SUM(rp2.tossups),
-                SUM(rp2.negs),
-                SUM(rp2.powers),
-                FORMAT(($loser[3]-SUM(10*rp2.tossups+15*rp2.powers-5*rp2.negs))/SUM(rp2.tossups+rp2.powers),2),
-                SUM(rp2.tu_heard),
-                SUM(10*rp2.tossups+15*rp2.powers-5*rp2.negs),
-                FORMAT(SUM(rp2.powers)/SUM(rp2.negs),2)
-            FROM {$mysql_prefix}_rounds_players AS rp1,
-                {$mysql_prefix}_rounds_players AS rp2
-            WHERE rp1.game_id = '$id' AND rp2.game_id = '$id'
-                AND rp1.team_id = '$winner[2]'
-                AND rp2.team_id = '$loser[2]'";
-        $tm_res = query($tm_query) or die(mysql_error());
-        list($wtups, $wnegs, $wpows, $wbconv, $wtuh, $wtot, $wpn,
-             $ltups, $lnegs, $lpows, $lbconv, $ltuh, $ltot, $lpn) = fetch_row($tm_res);
+$w_query = "SELECT SUM(rp.tossups),
+                SUM(rp.negs),
+                SUM(rp.powers),
+                FORMAT(($winner[3]-SUM(10*rp.tossups+15*rp.powers-5*rp.negs))/SUM(rp.tossups+rp.powers),2),
+                SUM(rp.tu_heard),
+                SUM(10*rp.tossups+15*rp.powers-5*rp.negs),
+                FORMAT(SUM(rp.powers)/SUM(rp.negs),2)
+            FROM {$mysql_prefix}_rounds_players AS rp
+            WHERE rp.game_id = '$id'
+                AND rp.team_id = '$winner[2]' ";
+$l_query = "SELECT SUM(rp.tossups),
+                SUM(rp.negs),
+                SUM(rp.powers),
+                FORMAT(($loser[3]-SUM(10*rp.tossups+15*rp.powers-5*rp.negs))/SUM(rp.tossups+rp.powers),2),
+                SUM(rp.tu_heard),
+                SUM(10*rp.tossups+15*rp.powers-5*rp.negs),
+                FORMAT(SUM(rp.powers)/SUM(rp.negs),2)
+            FROM {$mysql_prefix}_rounds_players AS rp
+            WHERE rp.game_id = '$id'
+                AND rp.team_id = '$loser[2]' ";
+
+        $w_res = query($w_query) or die(mysql_error());
+        $l_res = query($l_query) or die(mysql_error());
+        list($wtups, $wnegs, $wpows, $wbconv, $wtuh, $wtot, $wpn) = fetch_row($w_res);
+        list($ltups, $lnegs, $lpows, $lbconv, $ltuh, $ltot, $lpn) = fetch_row($l_res);
         
         // fetch player data
         $w_query = "SELECT CONCAT(p.first_name, ' ', p.last_name),
@@ -127,7 +130,7 @@ $tm_query = "SELECT SUM(rp1.tossups),
 	 <table>
 	  <thead>
 	   <tr class="<?=$winstyle?>">
-	    <th colspan="7" class="team"><?=$f1?> (<?=$wintext?>)</th>
+	    <th colspan="7" class="team"><?=$winner[1]?> (<?=$wintext?>)</th>
 	   </tr>
 	   <tr>
 	    <th>Name</th>
@@ -173,7 +176,7 @@ $tm_query = "SELECT SUM(rp1.tossups),
 <tbody><tr class="empty"><td colspan="7"></td></tr></tbody>
 	  <thead>
 	   <tr class="<?=$loserstyle?>">
-	    <th colspan="7" class="team"><?=$f2?> (<?=$losertext?>)</th>
+	    <th colspan="7" class="team"><?=$loser[1]?> (<?=$losertext?>)</th>
 	   </tr>
 	   <tr>
 	    <th>Name</th>

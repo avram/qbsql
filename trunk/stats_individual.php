@@ -27,7 +27,7 @@
                             WHERE "."$mysql_prefix"."_rounds_players.team_id="."$mysql_prefix"."_teams.id 
                                  AND "."$mysql_prefix"."_players.id="."$mysql_prefix"."_rounds_players.player_id
                             GROUP BY player_id ORDER BY pptuh DESC") or die(mysql_error());
-     table($res1,array("Name","Team","15","10","-5","Pts.","PPTUH","PPG","P/N","TUH"),9,TRUE,FALSE,"stats",array("ranked"));
+     table($res1,array("Name","Team","15","10","-5","Pts.","PPTUH","PPG","P/N","TUH"),10,TRUE,FALSE,"stats",array("ranked"));
  free_result($res1);
 ?>
     <p><strong>Note:</strong> The PPG above is calculated on the basis of tossups heard, 
