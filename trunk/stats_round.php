@@ -14,10 +14,18 @@
  $detail = ", CONCAT(\"<a href='game_detail.php?game=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Detail</a>\")";
  
  $res1 = query("SELECT "."$mysql_prefix"."_rounds.id,
-			    IF(score1>=score2,t1.full_name,t2.full_name) AS name1,
+			    CONCAT('<a href=\"rosters.php?t={$mysql_prefix}#',
+			         IF(score1>=score2,{$mysql_prefix}_tut1.team_id,
+			                         {$mysql_prefix}_tut2.team_id), '\">', 
+			         IF(score1>=score2,t1.full_name,t2.full_name),
+			     '</a>') AS name1,
 			    IF(score1>=score2,score1,score2) AS winscore,
 			    FORMAT(IF(score1>=score2,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc),2) AS winconv,
-			    IF(score1>=score2,t2.full_name,t1.full_name) AS name2,
+			    CONCAT('<a href=\"rosters.php?t={$mysql_prefix}#',
+			         IF(score1>=score2,{$mysql_prefix}_tut2.team_id,
+			                         {$mysql_prefix}_tut1.team_id), '\">', 
+			         IF(score1>=score2,t2.full_name,t1.full_name),
+			     '</a>') AS name2,
 			    IF(score1>=score2,score2,score1) AS losescore,
 			    FORMAT(IF(score1>=score2,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc),2) AS loseconv,
 			    ABS(score1-score2) $detail $edit_query
