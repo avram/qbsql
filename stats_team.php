@@ -9,7 +9,9 @@
  require "init.php";			// set up (connect to DB, etc)
  $title="Team statistics";
  require "head.php";			// Generate header as appropriate
-     $res1=query("SELECT "."$mysql_prefix"."_teams.full_name,"."$mysql_prefix"."_statt.wins,"."$mysql_prefix"."_statt.losses,"."$mysql_prefix"."_statt.draws,
+ $res1=query("SELECT CONCAT('<a href=\"rosters.php?t={$mysql_prefix}#', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
+                                '</a>'),
+     {$mysql_prefix}_statt.wins,"."$mysql_prefix"."_statt.losses,"."$mysql_prefix"."_statt.draws,
 			    FORMAT(wins/(wins+losses+draws), 3) as pct,
 			    FORMAT(pts/(wins+losses+draws),2) as ppg,
 			    FORMAT(opts/(wins+losses+draws),2) as oppg,

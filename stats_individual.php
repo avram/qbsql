@@ -10,8 +10,7 @@
  $title="Individual statistics";
  require "head.php";			// Generate header as appropriate
 
- $res1 = query("SELECT 
-                            CONCAT("."$mysql_prefix"."_players.first_name,\" \","."$mysql_prefix"."_players.last_name),
+ $res1 = query("SELECT CONCAT("."$mysql_prefix"."_players.first_name,\" \","."$mysql_prefix"."_players.last_name),
 			    "."$mysql_prefix"."_teams.short_name,
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0)) AS pow,
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,tossups,0)) AS tu,
