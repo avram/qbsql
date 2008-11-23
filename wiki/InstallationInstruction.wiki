@@ -24,3 +24,6 @@ mysql -u my_username -p my_password my_database < structure.sql
   # Add players to teams
   # Add matches
   # Enjoy!
+
+http://farm4.static.flickr.com/3294/3052558482_2a1ca73555.jpg
+http://farm4.static.flickr.com/3204/3052558460_7bf5e4c52d.jpg
