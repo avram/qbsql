@@ -16,7 +16,6 @@ table {
     }
 
 
-
 table td {
     color: black;
     border: 1px;
@@ -92,6 +91,24 @@ div.message {
 
 ul.nav {
     background-color: #dddddd;
+}
+
+/* Styling the login box */
+div#login {
+background-color: #eecccc;
+padding: 2px;
+}
+
+div#login h3, div#login p {
+display: inline;
+}
+
+div#login h3 {
+margin-right: 2em;
+}
+
+div#login * {
+font-size: 75%;
 }
 
 /* forms styles */
