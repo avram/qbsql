@@ -17,16 +17,16 @@
 </head>
 <body>
 <?php
-    }
 	if(!$auth) {
 		warning("You must log in to use this system.");
 	}
 	if($tourney_lock) {
 		warning("Tournament locked.");
-    }
+        }
 ?>
 </body>
 </html>
 <?php
-	die();
+        die();
+    }
 ?>
