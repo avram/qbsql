@@ -21,25 +21,13 @@
             $mysql_prefix = $_GET["t"];
         } else {
             // redirect to tournament list
-            print <<<RED
-<html><head>
-  <meta http-equiv="Refresh" content="1; url=tournaments.php">
-</head><body>
-  <p>Invalid tournament name. Please choose another: <a href="tournaments.php">Tournament List</a></p>
-</body></html>
-RED;
+           	header("Location: tournaments.php">
             exit();
         }
     } else {
         // redirect to tournament list
-            print <<<RED
-<html><head>
-  <meta http-equiv="Refresh" content="1; url=tournaments.php">
-</head><body>
-  <p>Invalid tournament name. Please choose another: <a href="tournaments.php">Tournament List</a></p>
-</body></html>
-RED;
-            exit();
+       	header("Location: tournaments.php">
+        exit();
     }
     
     $auth = FALSE;
