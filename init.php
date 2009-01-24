@@ -21,12 +21,12 @@
             $mysql_prefix = $_GET["t"];
         } else {
             // redirect to tournament list
-           	header("Location: tournaments.php">
+           	header("Location: tournaments.php");
             exit();
         }
     } else {
         // redirect to tournament list
-       	header("Location: tournaments.php">
+       	header("Location: tournaments.php");
         exit();
     }
     
