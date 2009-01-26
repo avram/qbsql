@@ -1,6 +1,12 @@
 <?php
 /** export.php
  * The beginnings of an export mechanism.
+ *
+ * As it currently stands, this will dump the SQL queries necessary
+ * to recreate the tournaments on this host in a new QBSQL install.
+ *
+ * It could be easily tweaked to export something more akin to what
+ * NAQT wants for its results database.
  */
 
 // To export, comment out the following line:
