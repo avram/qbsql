@@ -18,6 +18,6 @@ while (list($name, $prefix, $lock, $desc)=fetch_row($res)) {
 print "</ul>";
 ?>
 <p><a href="tournament_modify.php">[New Tournament]</a></p>
-<p>Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>
+<?php powered_by(); ?>
 </body>
 </html>

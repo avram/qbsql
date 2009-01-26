@@ -69,6 +69,10 @@ function close($link) {
       return mysql_close($link);
 }
 
+function powered_by() {
+    echo '<p id="powered">Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>'.'\n';
+}
+
 /* check_auth (string, string)
  * 
  * Checks password with the known hash, to allow or deny access to database.
