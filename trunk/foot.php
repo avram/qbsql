@@ -25,7 +25,8 @@
  <li><a href="team_modify.php?t=<?=$mysql_prefix?>">Add teams</a></li>
  <li><a href="add_game.php?t=<?=$mysql_prefix?>">Add a game</a></li>
 </ul>
-<?php } ?>
-<p>Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>
+<?php }
+powered_by();
+?>
 </body>
 </html>

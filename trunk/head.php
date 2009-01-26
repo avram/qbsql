@@ -18,6 +18,7 @@
  <meta http-equiv="Content-type" content='text/html; charset="UTF-8"' />
  <title><?php echo $title ?></title>
  <link rel="stylesheet" type="text/css" href="qbsql.css" />
+ <link rel="stylesheet" type="text/css" href="local.css" />
 </head>
 <body>
  <h4 class="headline"><strong><?=$tourney_name?></strong> | <a href="tournaments.php">Other Tournaments</a></h4>
