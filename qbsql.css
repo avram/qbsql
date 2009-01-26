@@ -93,10 +93,15 @@ ul.nav {
     background-color: #dddddd;
 }
 
+p#powered {
+    font-size: 60%;
+    color: #555;
+}
+
 /* Styling the login box */
 div#login {
-background-color: #eecccc;
-padding: 2px;
+    background-color: #eecccc;
+    padding: 2px;
 }
 
 div#login h3, div#login p {
