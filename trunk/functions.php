@@ -70,7 +70,7 @@ function close($link) {
 }
 
 function powered_by() {
-    echo '<p id="powered">Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>'.'\n';
+    echo '<p id="powered">Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>'."\n";
 }
 
 /* check_auth (string, string)
