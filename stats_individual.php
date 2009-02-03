@@ -36,10 +36,10 @@
          rp.powers*15 + rp.tossups*10 - rp.negs*5,
          FORMAT(rp.powers / rp.negs, 2),
          rp.tu_heard $detail $edit_query
-     FROM testtourney_teams AS t1,
-        testtourney_teams AS t2,
-        testtourney_rounds AS r,
-        testtourney_rounds_players AS rp
+     FROM {$mysql_prefix}_teams AS t1,
+        {$mysql_prefix}_teams AS t2,
+        {$mysql_prefix}_rounds AS r,
+        {$mysql_prefix}_rounds_players AS rp
     WHERE ((t1.id = r.team1 AND t2.id = r.team2)
         OR (t1.id = r.team2 AND t2.id = r.team1))
         AND t1.id = '$teamid'
