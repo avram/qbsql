@@ -95,7 +95,7 @@
 
  // If they haven't asked for anything, or they asked wrong, show the list
  if (!isset($_GET["team"]) || !is_numeric($_GET["team"])) {
- $res1=query("SELECT CONCAT('<a href=\"rosters.php?t={$mysql_prefix}#', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
+ $res1=query("SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
                                 '</a>'),
      {$mysql_prefix}_statt.wins,"."$mysql_prefix"."_statt.losses,"."$mysql_prefix"."_statt.draws,
 			    FORMAT(wins/(wins+losses+draws), 3) as pct,
