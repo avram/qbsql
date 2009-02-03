@@ -13,9 +13,9 @@
  // get the list of teams:
  $res_teams = query("SELECT "."$mysql_prefix"."_teams.full_name,id FROM "."$mysql_prefix"."_teams ORDER BY full_name") or die("could not get team list:".mysql_error());
  while(list($teamname,$teamid)=fetch_row($res_teams)) {
-     print "<h2>$teamname<a name='$teamid'></a></h2>";
+     print "<h2><a href='stats_team.php?t={$mysql_prefix}&team=$teamid'>$teamname</a><a name='$teamid'></a></h2>";
      $edit_query = ($auth) ? ", concat(\"<a href='roster_modify.php?edit=\",{$mysql_prefix}_players.id,\"&t={$mysql_prefix}'>Edit</a>\")" : "";
-     $res1 = query("SELECT CONCAT("."$mysql_prefix"."_players.first_name,\" \","."$mysql_prefix"."_players.last_name),
+     $res1 = query("SELECT CONCAT('<a href=\"stats_individual.php?t={$mysql_prefix}&player=', {$mysql_prefix}_players.id, '\">', "."$mysql_prefix"."_players.first_name,\" \","."$mysql_prefix"."_players.last_name, '</a>'),
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,powers,0)) AS pow,
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,tossups,0)) AS tu,
 			    SUM(IF("."$mysql_prefix"."_players.id=player_id,negs,0)) AS neg,

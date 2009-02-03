@@ -15,8 +15,9 @@
      $team_id = $_POST["team"];
      $i = 0;
      foreach($_POST["full"] as $team_full) {
-	 if($team_full != "") {
-	    $team_short = $_POST["short"][$i];
+         if($team_full != "") {
+             // If short name undefined, use long name instead
+	    $team_short = ($_POST["short"][$i] != "") ? $_POST["short"][$i] : $team_full;
 	    query("INSERT INTO "."$mysql_prefix"."_teams SET full_name=\"$team_full\",short_name=\"$team_short\""); 
 	    $i++;
 	 }
