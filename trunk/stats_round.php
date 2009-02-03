@@ -14,14 +14,14 @@
  $detail = ", CONCAT(\"<a href='game_detail.php?game=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Detail</a>\")";
  
  $res1 = query("SELECT "."$mysql_prefix"."_rounds.id,
-			    CONCAT('<a href=\"rosters.php?t={$mysql_prefix}#',
+			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
 			         IF(score1>=score2,{$mysql_prefix}_tut1.team_id,
 			                         {$mysql_prefix}_tut2.team_id), '\">', 
 			         IF(score1>=score2,t1.full_name,t2.full_name),
 			     '</a>') AS name1,
 			    IF(score1>=score2,score1,score2) AS winscore,
 			    FORMAT(IF(score1>=score2,(score1-"."$mysql_prefix"."_tut1.tup)/"."$mysql_prefix"."_tut1.tuc,(score2-"."$mysql_prefix"."_tut2.tup)/"."$mysql_prefix"."_tut2.tuc),2) AS winconv,
-			    CONCAT('<a href=\"rosters.php?t={$mysql_prefix}#',
+			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
 			         IF(score1>=score2,{$mysql_prefix}_tut2.team_id,
 			                         {$mysql_prefix}_tut1.team_id), '\">', 
 			         IF(score1>=score2,t2.full_name,t1.full_name),
