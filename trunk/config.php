@@ -13,10 +13,6 @@ $mysql_username = "my_username";
 $mysql_pass = "my_password";
 $mysql_db = "my_database";
 
-// Master username and password
-$master_username = "testserver";
-$master_password = "testpassword";
-
 // Notification
 $debug = TRUE;
 
