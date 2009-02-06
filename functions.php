@@ -207,6 +207,7 @@ CREATE TABLE {$prefix}_rounds (
   score1 int(20) default NULL,
   score2 int(20) default NULL,
   tu_heard int(20) default NULL,
+  tiebreakers int(20) default NULL,
   id int(20) NOT NULL default '0',
   game_id int(20) NOT NULL auto_increment,
   PRIMARY KEY  (game_id),
