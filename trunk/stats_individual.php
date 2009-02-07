@@ -20,7 +20,7 @@
                 WHERE {$mysql_prefix}_players.id='$playerid'
                     AND {$mysql_prefix}_players.team = {$mysql_prefix}_teams.id") or die("could not get player info:".mysql_error());
      list($playername, $teamname, $teamid) = fetch_row($res_players);
-     print "<h2>$playername (<a href='stats_team.php?t={$mysql_prefix}&team=$teamid'>$teamname</a>)</h2>";
+     print "<h2>$playername (<a href='stats_team.php?t={$mysql_prefix}&team=$teamid'>$teamname</a>) <a class='edit-player' href='roster_modify.php?edit=$playerid&t={$mysql_prefix}'>Edit</a></h2>";
      free_result($res_players);
 
  $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",r.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";

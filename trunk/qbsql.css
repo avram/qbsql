@@ -55,6 +55,11 @@ table thead th.team {
     font-size: 140%;
 }
 
+h2 a.edit-team, h2 a.edit-player {
+    font-size: 60%;
+    padding-left: 2em;
+}
+
 h4.headline {
     background: #eef;
     font-size: 60%;
