@@ -157,6 +157,19 @@ function popupHelp($topic){
     return "<sup> <a href='#' onClick=\"javaScript:window.open('help.php?topic=$topic','UCDB_Help','height=500,width=500,scrollbars,resizable,')\">[?]</a> </sup>\n";
 }
 
+/* Creates a database error warning. Observes debug mode */
+/* Does not halt execution. */
+function dbwarning($message, $query) {
+    global $debug;
+
+    if ($debug)
+        $additional = "<tt>".mysql_error()."</tt><pre class='db-error-query'>$query</pre>";
+    else
+        $additional = "";
+
+    warning("$message (".mysql_errno().") $additional");
+}
+
 /* creates a nice little warning box with the given text 
  warning("That's incorrect input");
  warning("You need to create teams first.", "Go to 'Add Teams'", "add_teams.php"); */
@@ -164,6 +177,7 @@ function warning() {
     global $mysql_prefix;
     $args = func_get_args();
     $text = $args[0];
+    $redirect = "";
     if(count($args) == 3) {
         $target = $args[2]."?t=".$mysql_prefix;
         $redirect_text = $args[1];
@@ -186,6 +200,20 @@ function message($text) {
 </div>
 EOP;
     print $box;
+}
+
+/* returns the brackets in use */
+function fetch_brackets() {
+    global $mysql_prefix;
+
+    $query = "SELECT DISTINCT bracket FROM {$mysql_prefix}_teams";
+    $res = query($query) or dbwarning("Failed to fetch brackets.",$query);
+    $brks = array();
+    while (list($brk) = fetch_row($res)) {
+        if(is_numeric($brk))
+            $brks[] = $brk;
+    }
+    return $brks;
 }
 
 /* Returns the queries to create tables for a given tournament */
@@ -230,6 +258,7 @@ CREATE TABLE {$prefix}_rounds_players (
 CREATE TABLE {$prefix}_teams (
   full_name varchar(30) default NULL,
   short_name varchar(30) default NULL,
+  bracket int(20) default NULL,
   id int(20) NOT NULL auto_increment,
   PRIMARY KEY  (id)
 ) ENGINE=MyISAM;
