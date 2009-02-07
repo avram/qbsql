@@ -8,6 +8,7 @@
  require "functions.php";
     $link = connect($mysql_host,$mysql_username,$mysql_pass,$mysql_db) or die('Failed to connect to DB server.');
  $title="Manage tournaments";
+ $tourney_name = "New Tournament";
  require "head.php";			// Generate header as appropriate
 
  if (isset($_GET["action"]) && $_GET["action"] == "add") {
