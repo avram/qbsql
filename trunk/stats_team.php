@@ -104,13 +104,19 @@
         $brackets = fetch_brackets();
         if (count($brackets) == 0)
             $brackets[] = 0;
+        
+        // Now see if we're missing anyone. If are NULL-bracket teams, add a 0-bracket
+        $res = query("SELECT COUNT(*) FROM {$mysql_prefix}_teams WHERE bracket IS NULL");
+        list($null_ct) = fetch_row($res);
+        if($null_ct > 0)
+            $brackets[] = 0;
 
         foreach($brackets as $bracket) {
             if($bracket != 0) {
                 print "<h2>Bracket $bracket</h2>\n";
                 $brk_q = " AND {$mysql_prefix}_teams.bracket = '$bracket' ";
             } else 
-                $brk_q = "";
+                $brk_q = " AND bracket IS NULL";
 
             $res1=query("SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
                                 '</a>'),
@@ -147,6 +153,7 @@
             table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","BConv"),11,TRUE,FALSE,"stats",array("ranked"));
             free_result($res1);
         }
+
  }
  require "foot.php";			// finish off page
 ?>

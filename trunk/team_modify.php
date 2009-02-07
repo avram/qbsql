@@ -82,7 +82,7 @@
  	$res = query($mod_query) or dbwarning("Team info update failed.", $mod_query);
         if($res)
             message("Applied changes");
- } else if ($_GET["action"]=="add_teams" && is_numeric($_POST["team"])) {
+ } else if ($_GET["action"]=="add_teams") {
      $team_id = $_POST["team"];
      $i = 0;
      foreach($_POST["full"] as $team_full) {
