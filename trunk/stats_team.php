@@ -9,13 +9,18 @@
  require "init.php";			// set up (connect to DB, etc)
  $title="Team statistics";
  require "head.php";			// Generate header as appropriate
+ 
 
  // If they've asked for a team detail, give it to them
  if (isset($_GET["team"]) && is_numeric($_GET["team"])) {
      $teamid=$_GET["team"];
-     $res_teams = query("SELECT "."$mysql_prefix"."_teams.full_name FROM "."$mysql_prefix"."_teams WHERE id='$teamid'") or die("could not get team info:".mysql_error());
-     list($teamname) = fetch_row($res_teams);
-     print "<h2>$teamname<a name='$'></a></h2>";
+     $edit_link = ($auth) ? "<a class='edit-team' href='team_modify.php?edit=$teamid&t=$mysql_prefix'>Edit</a>" : "";
+     $res_teams = query("SELECT full_name, bracket FROM "."$mysql_prefix"."_teams WHERE id='$teamid'") or die("could not get team info:".mysql_error());
+     list($teamname, $bracket) = fetch_row($res_teams);
+     print "<h2>$teamname $edit_link</h2>";
+     if (is_numeric($bracket)) {
+         print "<h3 class='bracket'>Bracket $bracket</h3>\n";
+     }
      $edit_query = ($auth) ? ", concat(\"<a href='roster_modify.php?edit=\",{$mysql_prefix}_players.id,\"&t={$mysql_prefix}'>Edit</a>\")" : "";
      $res1 = query("SELECT CONCAT('<a href=\"stats_individual.php?t={$mysql_prefix}&player=',
                                     {$mysql_prefix}_players.id, '\">',
@@ -94,8 +99,20 @@
  }
 
  // If they haven't asked for anything, or they asked wrong, show the list
- if (!isset($_GET["team"]) || !is_numeric($_GET["team"])) {
- $res1=query("SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
+     if (!isset($_GET["team"]) || !is_numeric($_GET["team"])) {
+         // See if we have brackets.
+        $brackets = fetch_brackets();
+        if (count($brackets) == 0)
+            $brackets[] = 0;
+
+        foreach($brackets as $bracket) {
+            if($bracket != 0) {
+                print "<h2>Bracket $bracket</h2>\n";
+                $brk_q = " AND {$mysql_prefix}_teams.bracket = '$bracket' ";
+            } else 
+                $brk_q = "";
+
+            $res1=query("SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
                                 '</a>'),
      {$mysql_prefix}_statt.wins,"."$mysql_prefix"."_statt.losses,"."$mysql_prefix"."_statt.draws,
 			    FORMAT(wins/(wins+losses+draws), 3) as pct,
@@ -125,9 +142,11 @@
                     WHERE "."$mysql_prefix"."_teams.id="."$mysql_prefix"."_rounds_players.team_id GROUP BY team_id) AS "."$mysql_prefix"."_tut,
                              "."$mysql_prefix"."_teams
 				WHERE "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_tut.team_id
-				    AND "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_teams.id ORDER BY pct DESC, pptuh DESC") or die(mysql_error());
-     table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","BConv"),11,TRUE,FALSE,"stats",array("ranked"));
-     free_result($res1);
+                                AND "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_teams.id
+                                $brk_q ORDER BY pct DESC, pptuh DESC") or die(mysql_error());
+            table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","BConv"),11,TRUE,FALSE,"stats",array("ranked"));
+            free_result($res1);
+        }
  }
  require "foot.php";			// finish off page
 ?>
