@@ -18,7 +18,7 @@
      $res_teams = query("SELECT full_name, bracket FROM "."$mysql_prefix"."_teams WHERE id='$teamid'") or die("could not get team info:".mysql_error());
      list($teamname, $bracket) = fetch_row($res_teams);
      print "<h2>$teamname $edit_link</h2>";
-     if (is_numeric($bracket)) {
+     if (is_numeric($bracket) && $bracket != 0) {
          print "<h3 class='bracket'>Bracket $bracket</h3>\n";
      }
      $edit_query = ($auth) ? ", concat(\"<a href='roster_modify.php?edit=\",{$mysql_prefix}_players.id,\"&t={$mysql_prefix}'>Edit</a>\")" : "";
@@ -114,9 +114,8 @@
         foreach($brackets as $bracket) {
             if($bracket != 0) {
                 print "<h2>Bracket $bracket</h2>\n";
-                $brk_q = " AND {$mysql_prefix}_teams.bracket = '$bracket' ";
-            } else 
-                $brk_q = " AND bracket IS NULL";
+            }
+            $brk_q = " AND {$mysql_prefix}_teams.bracket = '$bracket' ";
 
             $res1=query("SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
                                 '</a>'),

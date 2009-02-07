@@ -10,7 +10,7 @@
 
     // If we have a database migration, do it.
     /* Minimum db revision for this version of the code */
-    $required_rev = 39;
+    $required_rev = 41;
     require_once("migrations.php");
     migrate($required_rev);
 
