@@ -137,14 +137,18 @@ function table($result, $fields, $columns, $head, $names, $class, $options) {
     }
     $i = 0;
     while ($line = fetch_assoc($result)) {
+        $i++;
         print "\t<tr>\n";
         if ($ranks)
-            print "\t\t<td>".++$i."</td>\n";
+            print "\t\t<td>$i</td>\n";
         foreach ($line as $col_value) {
             print "\t\t<td>$col_value</td>\n";
         }
         print "\t</tr>\n";
     }
+    $columns++;
+    if ($i == 0) // No lines
+        print "\t<tr><td colspan='$columns' class='table-no-data'>No data</td></tr>\n";
     print "</tbody>\n</table>\n";
 }
 
