@@ -103,6 +103,15 @@ p#powered {
     color: #555;
 }
 
+/* Styling the tournament list */
+li.tourney-list p {
+    font-size: 70%;
+    background: #cce;
+    padding-right: 3px;
+    padding-left: 3px;
+    margin-right: 6em;
+}
+
 /* Styling the login box */
 div#login {
     background-color: #eecccc;
