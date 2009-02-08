@@ -3,7 +3,7 @@
 http://farm4.static.flickr.com/3204/3052558460_7bf5e4c52d.jpg
 
 = Installation =
-  # Download the code from the Source section and unzip it somewhere accessible by your webserver.
+  # Download the code from the Source section and unzip it somewhere accessible by your webserver. Note, however, that the zip files in the Downloads section are usually outdated. It is almost always better to go to [http://code.google.com/p/qbsql/source/checkout Source Checkout].
   # Edit the file `config.php` as necessary.
   # Import `structure.sql` into your MySQL database, using a command like:
 {{{
@@ -35,7 +35,7 @@ http://farm4.static.flickr.com/3294/3052558482_2a1ca73555.jpg
   # *Deleting games*: Go to the edit page as above, then check the "Confirm delete" checkbox and click the "Delete this round" button. Deletes cannot be undone.
   # *Editing players*: From the *Team rosters* page, click "Edit".
   # *Deleting players*: Go to the edit page as above, then check the checkbox and click the "Delete" button. Deletes cannot be undone. Note that you cannot delete a player that has games in the database. You will have to delete any games the player played before deleting the player.
-  # *Deleting and editing teams*: Teams cannot be deleted or edited.
+  # *Deleting and editing teams*: This is about the same as deleting players.
 
 = Things to watch for =
   * When adding players and teams, be careful to check that the player wasn't already added. You can look at the *Team rosters* page to see who's already been added.
