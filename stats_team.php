@@ -128,7 +128,11 @@
 			    FORMAT(pts/tuh,2) as pptuh,
 			    FORMAT(opts/tuh,2) as opptuh,
 			    FORMAT(pow/neg,2) AS pn,
-			    FORMAT((pts-tup)/tuc,2) as bconv
+			    pow,
+			    tups,
+			    neg,
+                            tuh,
+                            FORMAT((pts-tup)/tuc,2) as bconv
                             FROM 
                             (SELECT 
 			    "."$mysql_prefix"."_teams.id as id,
@@ -143,7 +147,8 @@
                             (SELECT SUM(powers*15+tossups*10+negs*(-5)) as tup,
 		    SUM(powers+tossups) as tuc,
 		    SUM(powers) as pow,
-		    SUM(negs) AS neg,
+                    SUM(negs) AS neg,
+                    SUM(tossups) as tups,
 		    team_id 
                     FROM "."$mysql_prefix"."_teams, "."$mysql_prefix"."_rounds_players
                     WHERE "."$mysql_prefix"."_teams.id="."$mysql_prefix"."_rounds_players.team_id GROUP BY team_id) AS "."$mysql_prefix"."_tut,
@@ -151,7 +156,7 @@
 				WHERE "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_tut.team_id
                                 AND "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_teams.id
                                 $brk_q ORDER BY pct DESC, pptuh DESC") or die(mysql_error());
-            table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","BConv"),11,TRUE,FALSE,"stats",array("ranked"));
+            table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","15","10","-5","TUH","BConv"),15,TRUE,FALSE,"stats",array("ranked"));
             free_result($res1);
         }
 
