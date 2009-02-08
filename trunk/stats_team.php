@@ -111,6 +111,8 @@
         if($null_ct > 0)
             $brackets[] = 0;
 
+        sort($brackets);
+
         foreach($brackets as $bracket) {
             if($bracket != 0) {
                 print "<h2>Bracket $bracket</h2>\n";
