@@ -24,6 +24,7 @@
  <li><a href="roster_modify.php?t=<?=$mysql_prefix?>">Add players</a></li>
  <li><a href="team_modify.php?t=<?=$mysql_prefix?>">Add teams</a></li>
  <li><a href="add_game.php?t=<?=$mysql_prefix?>">Add a game</a></li>
+ <li><a href="tournament_admin.php?t=<?=$mysql_prefix?>">Tournament Admin</a></li>
 </ul>
 <?php }
 powered_by();

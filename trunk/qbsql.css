@@ -132,7 +132,7 @@ font-size: 75%;
 
 /* forms styles */
 form#newtourney {
-width: 600px;
+width: 900px;
 }
 fieldset {  
 float: left;  
@@ -175,6 +175,7 @@ margin-right: 1em;
 font-size: 70%;
 text-align: right;
 }
+
 
 
 /* style thanks to http://robertdenton.org/reference/css-tables-tutorial.html */

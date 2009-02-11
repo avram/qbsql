@@ -220,6 +220,7 @@ function fetch_brackets() {
     return $brks;
 }
 
+/* Exporting functions */
 /* Returns the queries to create tables for a given tournament */
 function table_create_queries($prefix) {
          $query = <<<CREATE
@@ -268,6 +269,132 @@ CREATE TABLE {$prefix}_teams (
 ) ENGINE=MyISAM;
 CREATE;
          return $query;
+}
+
+function export_table($name) {
+    print "/* Table $name */\n";
+    $res = query("SELECT * FROM $name");
+    while($row = fetch_row($res)) {
+        print 'INSERT INTO '.$name.' VALUES ("';
+        print implode('","', $row);
+        print "\");\n";
+    }
+}
+
+function export_tournament($prefix) {
+    print "/* Tournament $prefix */\n";
+    print table_create_queries($prefix);
+    export_table("{$prefix}_players");
+    export_table("{$prefix}_rounds");
+    export_table("{$prefix}_rounds_players");
+    export_table("{$prefix}_teams");
+}
+
+function export_database() {
+    print "/* Exporting Database */\n";
+    $res = query("SELECT * FROM tournaments") or print(mysql_error());
+    while($row = fetch_row($res)) {
+        print 'INSERT INTO tournaments VALUES ("';
+        print implode('","', $row);
+        print "\");\n";
+        export_tournament($row[2]);
+    }
+}
+
+function sqbs_export_tourney($prefix) {
+    $sqbs = "";
+    $res = query("SELECT COUNT(*) FROM {$prefix}_teams");
+    list($t_ct) = fetch_row($res);
+    $sqbs .= "$t_ct\n";
+
+    $tm_id_to_index = array();
+    $p_id_to_index = array();
+
+    $t_index = 0;
+
+    $t_res = query("SELECT full_name, id FROM {$prefix}_teams ORDER BY full_name");
+    while(list($tname, $tid) = fetch_row($t_res)) {
+        $p_ct_res = query("SELECT COUNT(*) FROM {$prefix}_players WHERE team='$tid'");
+        list($p_ct) = fetch_row($p_ct_res);
+        $p_ct++;
+        $sqbs .= "$p_ct\n";
+        $sqbs .= "$tname\n";
+
+        // Remember what index we gave the team
+        $tm_id_to_index[$tid] = $t_index;
+        $t_index++;
+
+        $p_res = query("SELECT first_name, last_name, id FROM {$prefix}_players WHERE team='$tid' ORDER BY last_name");
+        $p_index = 0;
+        while(list($fn, $ln, $pid) = fetch_row($p_res)) {
+            $sqbs .= "$fn $ln\n";
+            // Remember what index we gave the player
+            $p_id_to_index[$pid] = $p_index;
+            $p_index++;
+        }
+    }
+
+    $g_ct_res = query("SELECT COUNT(*) FROM {$prefix}_rounds");
+    list($g_ct) = fetch_row($g_ct_res);
+    $sqbs .= "$g_ct\n";
+
+    $g_res = query("SELECT team1, team2, score1, score2, tu_heard, r.id,
+                        t1.bons, t1.tuppts, t2.bons, t2.tuppts, r.game_id
+                    FROM {$prefix}_rounds AS r,
+                    (SELECT SUM(tossups+powers) AS bons, SUM(tossups*10+powers*15-negs*5) AS tuppts, game_id, team_id
+                        FROM {$prefix}_rounds_players GROUP BY game_id, team_id) AS t1,
+                    (SELECT SUM(tossups+powers) AS bons, SUM(tossups*10+powers*15-negs*5) AS tuppts, game_id, team_id
+                        FROM {$prefix}_rounds_players GROUP BY game_id, team_id) AS t2
+                    WHERE t1.team_id = team1 AND t2.team_id = team2 AND t1.game_id=r.game_id AND t2.game_id=r.game_id ORDER BY r.id") or die(mysql_error());
+    while(list($t1,$t2, $sc1, $sc2, $tuh, $rnd, $bons1, $tuppts1, $bons2, $tuppts2, $game) = fetch_row($g_res)) {
+        $sqbs .= $tm_id_to_index[$t1]."\n";     // index of team 1
+        $sqbs .= $tm_id_to_index[$t2]."\n";     // index of team 2
+        $sqbs .= "$sc1\n";                      // team1 score
+        $sqbs .= "$sc2\n";
+        $sqbs .= "$tuh\n";                      // tossups heard, inc. tiebreakers
+        $sqbs .= "$rnd\n";                      // round
+        $sqbs .= "$bons1\n";                    // team1 bonus ct
+        $sqbs .= ($sc1-$tuppts1)."\n";          // team1 bonus pts
+        $sqbs .= "$bons2\n";
+        $sqbs .= ($sc2-$tuppts2)."\n";
+        $sqbs .= "0\n";                         // overtime (1=yes, 0=no)
+        $sqbs .= "0\n";                         // team1 # correct OT tups
+        $sqbs .= "0\n";                         // team2  --same--
+        $sqbs .= "0\n";                         // forfeit (1=team1 forfeit, 0=no)
+        $sqbs .= "0\n";         // lightning t1 pts
+        $sqbs .= "0\n";         // lightning t2 pts
+
+        // Now the player scores, team 1
+        $p1_res_sc = query("SELECT tu_heard, powers, tossups, negs, player_id FROM {$prefix}_rounds_players WHERE game_id = '$game' AND team_id='$t1'") or die(mysql_error());
+        $p_buffer = 0;
+        // Now the player scores, team 2
+        $p2_res_sc = query("SELECT tu_heard, powers, tossups, negs, player_id FROM {$prefix}_rounds_players WHERE game_id = '$game' AND team_id='$t2'") or die(mysql_error());
+        while ($p_buffer < 7) {
+            if(list($p_tuh, $pows, $tups, $negs, $pid) = fetch_row($p1_res_sc)) {
+                $sqbs .= $p_id_to_index[$pid]."\n"; // player index of player1
+                $sqbs .= $p_tuh/$tuh."\n";          // fraction of game played
+                $sqbs .= "$pows\n";
+                $sqbs .= "$tups\n";
+                $sqbs .= "$negs\n";
+                $sqbs .= "0\n";                    // always 0
+            } else {
+                $sqbs .= "-1\n0\n0\n0\n0\n0\n";    // fill remaining player lines with emptiness 
+            }
+            if(list($p_tuh, $pows, $tups, $negs, $pid) = fetch_row($p2_res_sc)) {
+                $sqbs .= $p_id_to_index[$pid]."\n"; // player index of player1
+                $sqbs .= $p_tuh/$tuh."\n";          // fraction of game played
+                $sqbs .= "$pows\n";
+                $sqbs .= "$tups\n";
+                $sqbs .= "$negs\n";
+                $sqbs .= "0\n";                    // always 0
+            } else {
+                $sqbs .= "-1\n0\n0\n0\n0\n0\n";    // fill remaining player lines with emptiness 
+            }
+            $p_buffer++;
+        }
+    }
+
+    return $sqbs;
 }
 
 ?>
