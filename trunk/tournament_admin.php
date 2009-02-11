@@ -10,6 +10,7 @@
  */
  require "init.php";			// set up (connect to DB, etc)
  require "require_admin.php";		// not just anyone can use this
+ $js_includes=True;
  $title="Administer Tournament";
  require "head.php";			// Generate header as appropriate
 

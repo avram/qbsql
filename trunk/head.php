@@ -19,6 +19,7 @@
  <title><?php echo $title ?></title>
  <link rel="stylesheet" type="text/css" href="qbsql.css" />
  <link rel="stylesheet" type="text/css" href="local.css" />
+<?php if(isset($js_includes) && $js_includes) { // Don't include JS if not needed ?> 
  <script type="text/javascript" src="inc/jquery.js"></script>
  <script type="text/javascript" src="inc/wymeditor/wymeditor/jquery.wymeditor.pack.js"></script>
  <script type="text/javascript">
@@ -88,6 +89,7 @@ jQuery(function() {
     });
 });
  </script>
+<?php } ?>
 </head>
 <body>
  <h4 class="headline"><strong><?=$tourney_name?></strong> | <a href="tournaments.php">Other Tournaments</a></h4>
