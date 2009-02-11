@@ -370,7 +370,7 @@ function sqbs_export_tourney($prefix) {
         $p_buffer = 0;
         // Now the player scores, team 2
         $p2_res_sc = query("SELECT tu_heard, powers, tossups, negs, player_id FROM {$prefix}_rounds_players WHERE game_id = '$game' AND team_id='$t2'") or die(mysql_error());
-        while ($p_buffer < 7) {
+        while ($p_buffer <= 7) {
             if(list($p_tuh, $pows, $tups, $negs, $pid) = fetch_row($p1_res_sc)) {
                 $sqbs .= $p_id_to_index[$pid]."\n"; // player index of player1
                 $sqbs .= $p_tuh/$tuh."\n";          // fraction of game played
@@ -378,8 +378,9 @@ function sqbs_export_tourney($prefix) {
                 $sqbs .= "$tups\n";
                 $sqbs .= "$negs\n";
                 $sqbs .= "0\n";                    // always 0
+                $sqbs .= ($pows*15+$tups*10-$negs*5)."\n";                    // tossup pts
             } else {
-                $sqbs .= "-1\n0\n0\n0\n0\n0\n";    // fill remaining player lines with emptiness 
+                $sqbs .= "-1\n0\n0\n0\n0\n0\n0\n";    // fill remaining player lines with emptiness 
             }
             if(list($p_tuh, $pows, $tups, $negs, $pid) = fetch_row($p2_res_sc)) {
                 $sqbs .= $p_id_to_index[$pid]."\n"; // player index of player1
@@ -388,8 +389,9 @@ function sqbs_export_tourney($prefix) {
                 $sqbs .= "$tups\n";
                 $sqbs .= "$negs\n";
                 $sqbs .= "0\n";                    // always 0
+                $sqbs .= ($pows*15+$tups*10-$negs*5)."\n";                    // tossup pts
             } else {
-                $sqbs .= "-1\n0\n0\n0\n0\n0\n";    // fill remaining player lines with emptiness 
+                $sqbs .= "-1\n0\n0\n0\n0\n0\n0\n";    // fill remaining player lines with emptiness 
             }
             $p_buffer++;
         }
