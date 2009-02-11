@@ -347,6 +347,7 @@ function sqbs_export_tourney($prefix) {
                         FROM {$prefix}_rounds_players GROUP BY game_id, team_id) AS t2
                     WHERE t1.team_id = team1 AND t2.team_id = team2 AND t1.game_id=r.game_id AND t2.game_id=r.game_id ORDER BY r.id") or die(mysql_error());
     while(list($t1,$t2, $sc1, $sc2, $tuh, $rnd, $bons1, $tuppts1, $bons2, $tuppts2, $game) = fetch_row($g_res)) {
+        $sqbs .= "$game\n";                     // unique identifier for game
         $sqbs .= $tm_id_to_index[$t1]."\n";     // index of team 1
         $sqbs .= $tm_id_to_index[$t2]."\n";     // index of team 2
         $sqbs .= "$sc1\n";                      // team1 score
