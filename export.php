@@ -19,8 +19,10 @@ require_once("init.php");
 require("require_admin.php");
 $link = connect($mysql_host,$mysql_username,$mysql_pass,$mysql_db) or die('Failed to connect to DB server.');
 
-if(!headers_sent())
+if(!headers_sent()) {
     header("Content-Type: text/plain; charset=UTF-8");
+    header("Content-disposition: attachment; filename=$mysql_prefix.sqbs");
+}
 
 // To export the entire database, change the next line as directed above.
 // Note the warning above.
