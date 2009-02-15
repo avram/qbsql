@@ -118,40 +118,98 @@ function check_auth($username, $pass) {
  *      "ranked"
  */
 function table($result, $fields, $columns, $head, $names, $class, $options) {
-    // should we show row numbers (ranks)? 
-    $ranks = (array_key_exists("ranked",$options) || in_array("ranked",$options));
-    print "<table class=\"$class\">\n";
-    if ($head) {
-        print "\t<thead>\n\t<tr>\n";
-        if ($ranks)
-           print "\t\t<th>Rank</th>\n"; 
-        for ($i = 0; $i < $columns; $i++) {
-            print "\t\t<th>";
-            if ($names)
-              print field_name($fields, $i);
-            else
-              print $fields[$i];
-            print "</th>\n";
-        }
-    print "\t</tr>\t</thead>\n<tbody>\n";
-    }
-    $i = 0;
-    while ($line = fetch_assoc($result)) {
-        $i++;
-        print "\t<tr>\n";
-        if ($ranks)
-            print "\t\t<td>$i</td>\n";
-        foreach ($line as $col_value) {
-            print "\t\t<td>$col_value</td>\n";
-        }
-        print "\t</tr>\n";
-    }
-    $columns++;
-    if ($i == 0) // No lines
-        print "\t<tr><td colspan='$columns' class='table-no-data'>No data</td></tr>\n";
-    print "</tbody>\n</table>\n";
+    StatsTable::old($result, $fields, $columns, $head, $names, $class, $options);
 }
 
+class StatsTable {
+    var $fields;
+    var $class;
+    var $sort;
+    var $ranks;
+
+    var $html;
+    var $next_rank;
+
+    function StatsTable($fields, $sort, $ranks, $class) {
+        $this->next_rank = 1;
+        $this->ranks = $ranks;
+        $this->fields = $fields;
+        $this->class = $class;
+        $this->sort = $sort;
+    }
+
+    function next_rank($rank) {
+        $this->next_rank = $rank;
+    }
+
+    function table() {
+        if($this->sort) {
+            $sort_id = "sort";
+        $final = <<<EOS
+ <script language="javascript">
+$(document).ready(function() 
+    { 
+        $(".sort").tablesorter(); 
+    } 
+);
+ </script>
+EOS;
+        }
+        $final .= "<table class='$this->class $sort_id'>\n";
+        $final .= $this->html;
+        $final .= "</table>";
+        return $final;
+    }
+
+    function names() {
+        $columns = count($this->fields);
+        $this->html .=  "\t<thead>\n\t<tr>\n";
+        if ($this->ranks)
+            $this->html .=  "\t\t<th>Rank</th>\n"; 
+        for ($i = 0; $i < $columns; $i++) {
+            $this->html .=  "\t\t<th>".$this->fields[$i] .  "</th>\n";
+        }
+        $this->html .=  "\t</tr>\t</thead>\n";
+    }
+
+    function interstitial($str) {
+        $cols = count($this->fields);
+        if($this->ranks)
+            $cols++;
+        $this->html .= "<thead><tr><th colspan='$cols'>$str</th></tr></thead>\n";
+    } 
+
+    function body_res($result) {
+        $this->html .= "<tbody>\n";
+        $i = $this->next_rank;
+        $columns = 0;
+        while ($line = fetch_assoc($result)) {
+            $columns = 0;
+            $this->html .= "\t<tr>\n";
+            if ($this->ranks) {
+                $columns++;
+                $this->html .= "\t\t<td>$i</td>\n";
+            }
+            foreach ($line as $col_value) {
+                $columns++;
+                $this->html .= "\t\t<td>$col_value</td>\n";
+            }
+            $this->html .= "\t</tr>\n";
+            $i++;
+        }
+        if ($i == $this->next_rank) // No lines
+            $this->html .= "\t<tr><td colspan='$columns' class='table-no-data'>No data</td></tr>\n";
+        $this->html .= "</tbody>\n";
+    }
+
+    function old($res, $fields, $columns, $head, $names, $class, $options) {
+        $table = new StatsTable($fields, array_key_exists("sort",$options) || in_array("sort",$options),
+                array_key_exists("ranked",$options) || in_array("ranked",$options), $class);
+        $table->names();
+        $table->body_res($res);
+        print $table->table();
+    }
+}
 
 
 // Define the functions that we use:
