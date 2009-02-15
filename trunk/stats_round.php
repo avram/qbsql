@@ -7,7 +7,8 @@
  * Created: 25 February 2004
  */
  require "init.php";			// set up (connect to DB, etc)
- $title="Round summaries";
+$title="Round summaries";
+$js_includes = true;
  require "head.php";			// Generate header as appropriate
 
  $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";
@@ -55,7 +56,7 @@
 			    AND "."$mysql_prefix"."_tut2.round_id="."$mysql_prefix"."_rounds.id
 			    AND "."$mysql_prefix"."_tut2.team_id=t2.id
 			ORDER BY "."$mysql_prefix"."_rounds.id ASC") or die(mysql_error());
-     table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array());
+     table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array("sort"));
      free_result($res1);
  
  require "foot.php";			// finish off page

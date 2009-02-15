@@ -7,7 +7,8 @@
  * Created: 25 February 2004
  */
  require "init.php";			// set up (connect to DB, etc)
- $title="Team statistics";
+$title="Team statistics";
+$js_includes = true;
  require "head.php";			// Generate header as appropriate
  
 
@@ -42,7 +43,7 @@
                             AND {$mysql_prefix}_teams.id = {$mysql_prefix}_players.team 
 			GROUP BY {$mysql_prefix}_players.id
 			ORDER BY pptuh DESC") or die(mysql_error());
-     table($res1,array("Name","15","10","-5","Pts.","PPTUH","PPG","P/N","TUH"),9,TRUE,FALSE,"stats",array());
+     table($res1,array("Name","15","10","-5","Pts.","PPTUH","PPG","P/N","TUH"),9,TRUE,FALSE,"stats",array("sort" => ""));
      free_result($res1);
 ?>
     <h4>Games</h4>
@@ -94,7 +95,7 @@
                             AND "."$mysql_prefix"."_tut2.team_id=t2.id
                             AND (t1.id=$teamid OR t2.id=$teamid)
 			ORDER BY "."$mysql_prefix"."_rounds.id ASC") or die(mysql_error());
-     table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array());
+     table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array("sort"=>""));
      free_result($res1);
  }
 
@@ -113,10 +114,16 @@
 
         sort($brackets);
 
+        $table = new StatsTable(array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","15","10","-5","TUH","BConv"),TRUE,TRUE,"stats");
+
         foreach($brackets as $bracket) {
             if($bracket != 0) {
-                print "<h2>Bracket $bracket</h2>\n";
+                $table->interstitial("Bracket $bracket");
             }
+
+            // Place headers after bracket name
+            $table->names();
+            
             $brk_q = " AND {$mysql_prefix}_teams.bracket = '$bracket' ";
 
             $res1=query("SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
@@ -156,10 +163,18 @@
 				WHERE "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_tut.team_id
                                 AND "."$mysql_prefix"."_statt.id="."$mysql_prefix"."_teams.id
                                 $brk_q ORDER BY pct DESC, pptuh DESC") or die(mysql_error());
-            table($res1,array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","15","10","-5","TUH","BConv"),15,TRUE,FALSE,"stats",array("ranked"));
+            $table->body_res($res1);
             free_result($res1);
+            
+            // See how many teams are in the bracket
+            $res = query("SELECT COUNT(*) FROM {$mysql_prefix}_teams WHERE bracket = '$bracket'");
+            list($tm_ct) = fetch_row($res);
+
+            $table->next_rank($table->next_rank + $tm_ct);
+
         }
 
+        print $table->table();
  }
  require "foot.php";			// finish off page
 ?>
