@@ -12,11 +12,11 @@ CREATE TABLE `tournaments` (
       `description` text NOT NULL,
       PRIMARY KEY  (`id`),
       UNIQUE KEY `prefix` (`prefix`)
-)
+);
 
 CREATE TABLE `qb_admin` (
         `rev` int(11) NOT NULL
-)
+);
 
 /** Tables created on the fly
 CREATE TABLE {$prefix}_players (
