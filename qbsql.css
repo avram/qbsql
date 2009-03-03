@@ -206,4 +206,32 @@ table thead th
     border-bottom: 2px #fff solid;
     font-size: 12px;
     font-weight: bold;}
-    
+
+/* sorted tables http://tablesorter.com/docs/
+ GPL / MIT license by Christian Bach */
+/* tables */
+table.sort {
+    text-align: left;
+}
+table.sort thead tr th, table.sort tfoot tr th {
+}
+table.sort thead tr .header {
+    background-repeat: no-repeat;
+    background-position: center right;
+    cursor: pointer;
+}
+table.sort tbody td {
+    vertical-align: top;
+}
+table.sort tbody tr.odd td {
+    background-color:#F0F0F6;
+}
+table.sort thead tr .headerSortUp {
+    background-image: url(asc.gif);
+}
+table.sort thead tr .headerSortDown {
+    background-image: url(desc.gif);
+}
+table.sort thead tr .headerSortDown, table.sort thead tr .headerSortUp {
+    background-color: #8dbdd8;
+}
