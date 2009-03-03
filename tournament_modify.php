@@ -32,8 +32,10 @@
                     description = '$_POST[desc]'") or die(mysql_error());
          $prefix = $_POST["prefix"];
 
-         $query = table_create_queries($prefix);
-         query($query) or die(mysql_error());
+         $queries = table_create_queries($prefix);
+         foreach ($queries as $query) {
+             query($query) or die(mysql_error());
+         }
          
             // redirect to tournament list
             print <<<RED
