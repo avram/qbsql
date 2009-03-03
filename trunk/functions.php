@@ -149,7 +149,7 @@ class StatsTable {
  <script language="javascript">
 $(document).ready(function() 
     { 
-        $(".sort").tablesorter(); 
+        $(".sort").tablesorter({widgets: ['zebra']});
     } 
 );
  </script>
@@ -280,8 +280,10 @@ function fetch_brackets() {
 
 /* Exporting functions */
 /* Returns the queries to create tables for a given tournament */
+/* Result is an array of queries */
 function table_create_queries($prefix) {
-         $query = <<<CREATE
+    $queries = array();
+    $query = <<<CREATE
 CREATE TABLE {$prefix}_players (
   last_name varchar(40) default NULL,
   first_name varchar(40) default NULL,
@@ -290,7 +292,9 @@ CREATE TABLE {$prefix}_players (
   id int(20) NOT NULL auto_increment,
   KEY id (id)
 ) ENGINE=MyISAM;
-
+CREATE;
+    $queries[] = $query;
+    $query = <<<CREATE
 CREATE TABLE {$prefix}_rounds (
   name varchar(40) default NULL,
   team1 int(20) NOT NULL default '0',
@@ -304,7 +308,9 @@ CREATE TABLE {$prefix}_rounds (
   PRIMARY KEY  (game_id),
   KEY id (id)
 ) ENGINE=MyISAM;
-
+CREATE;
+    $queries[] = $query;
+    $query = <<<CREATE
 CREATE TABLE {$prefix}_rounds_players (
   player_id int(20) NOT NULL default '0',
   team_id int(20) NOT NULL default '0',
@@ -317,7 +323,9 @@ CREATE TABLE {$prefix}_rounds_players (
   KEY round_id (round_id),
   KEY game_id (game_id)
 ) ENGINE=MyISAM;
-
+CREATE;
+    $queries[] = $query;
+    $query = <<<CREATE
 CREATE TABLE {$prefix}_teams (
   full_name varchar(30) default NULL,
   short_name varchar(30) default NULL,
@@ -326,7 +334,8 @@ CREATE TABLE {$prefix}_teams (
   PRIMARY KEY  (id)
 ) ENGINE=MyISAM;
 CREATE;
-         return $query;
+    $queries[] = $query;
+    return $queries;
 }
 
 function export_table($name) {
@@ -341,7 +350,9 @@ function export_table($name) {
 
 function export_tournament($prefix) {
     print "/* Tournament $prefix */\n";
-    print table_create_queries($prefix);
+    foreach (table_create_queries($prefix) as $q) {
+        print $q;
+    }
     export_table("{$prefix}_players");
     export_table("{$prefix}_rounds");
     export_table("{$prefix}_rounds_players");
