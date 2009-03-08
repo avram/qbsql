@@ -329,7 +329,7 @@ CREATE;
 CREATE TABLE {$prefix}_teams (
   full_name varchar(30) default NULL,
   short_name varchar(30) default NULL,
-  bracket int(20) default NULL,
+  bracket int(20) NOT NULL default '0',
   id int(20) NOT NULL auto_increment,
   PRIMARY KEY  (id)
 ) ENGINE=MyISAM;
