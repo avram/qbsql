@@ -16,6 +16,11 @@ function link_player($name, $id) {
     return "<a href='stats_individual.php?t={$mysql_prefix}&player=$id'>$name</a>";
 }
 
+function link_player_naqt($id) {
+    if(is_numeric($id))
+        return "<p class='db-link'><a href='http://www.naqt.com/stats/player.jsp?contact_id=$id'>Player info at NAQT results database</a></p>";
+}
+
 // database wrappers
 function connect($host, $username, $pass, $db) {
     global $mysql_library;

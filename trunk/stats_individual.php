@@ -16,12 +16,13 @@
  if (isset($_GET["player"]) && is_numeric($_GET["player"])) {
      $playerid=$_GET["player"];
      $res_players = query("SELECT CONCAT({$mysql_prefix}_players.first_name, ' ', {$mysql_prefix}_players.last_name),
-                {$mysql_prefix}_teams.full_name, {$mysql_prefix}_teams.id
+                {$mysql_prefix}_teams.full_name, {$mysql_prefix}_teams.id, {$mysql_prefix}_players.naqtid
                 FROM {$mysql_prefix}_players, {$mysql_prefix}_teams
                 WHERE {$mysql_prefix}_players.id='$playerid'
                     AND {$mysql_prefix}_players.team = {$mysql_prefix}_teams.id") or die("could not get player info:".mysql_error());
-     list($playername, $teamname, $teamid) = fetch_row($res_players);
-     print "<h2>$playername (<a href='stats_team.php?t={$mysql_prefix}&team=$teamid'>$teamname</a>) <a class='edit-player' href='roster_modify.php?edit=$playerid&t={$mysql_prefix}'>Edit</a></h2>";
+     list($playername, $teamname, $teamid, $naqtid) = fetch_row($res_players);
+     $edit_str = ($auth) ? "<a class='edit-player' href='roster_modify.php?edit=$playerid&t={$mysql_prefix}'>Edit</a>" : "";
+     print "<h2>$playername (<a href='stats_team.php?t={$mysql_prefix}&team=$teamid'>$teamname</a>) $edit_str</h2>";
      free_result($res_players);
 
  $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",r.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";
@@ -48,7 +49,8 @@
         AND rp.game_id = r.game_id
         ORDER BY r.id ASC") or die(mysql_error());
      table($res1,array("Round","Opponent","Result","15","10","-5","Pts.","P/N", "TUH","Detail"),9,TRUE,FALSE,"stats",array());
-     free_result($res1);
+    free_result($res1);
+    print link_player_naqt($naqtid);
  }
 
  // If they haven't asked for anything, or they asked wrong, show the list

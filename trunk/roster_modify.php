@@ -44,10 +44,10 @@
  if ((isset($_GET["edit"]) && is_numeric($_GET["edit"])) || 
  		(isset($_GET["delete"]) && is_numeric($_GET["delete"]) && $_POST["confirm"] != "yes")) {
  	$pid = (isset($_GET["edit"])) ? $_GET["edit"] : $_GET["delete"];
- 	$player_query = "SELECT p.first_name, p.last_name, t.full_name FROM {$mysql_prefix}_players AS p," .
+ 	$player_query = "SELECT p.first_name, p.last_name, t.full_name, p.naqtid FROM {$mysql_prefix}_players AS p," .
  			"			{$mysql_prefix}_teams AS t" .
  			"		WHERE p.team = t.id AND p.id=$pid LIMIT 1";
- 	list($fn,$ln,$team) = fetch_row(query($player_query));
+ 	list($fn,$ln,$team,$naqtid) = fetch_row(query($player_query));
  ?>
 
  <h2>Editing <?=$fn?> <?=$ln?>, for <?=$team?></h2>
@@ -58,12 +58,13 @@
  <form action="?modify=<?=$pid?>&t=<?=$mysql_prefix?>" method="post">
  <p>First Name: <input type="text" name="p_fn" size="12" value="<?=$fn?>" /></p>
  <p>Last Name: <input type="text" name="p_ln" size="12" value="<?=$ln?>" /></p>
+ <p>NAQT ID: <input type="text" name="naqtid" size="8" value="<?=$naqtid?>" /></p>
  <p><input type="submit" value="Apply Changes" /></p>
  </form>
  <?php
  } else if (isset($_GET["modify"]) && is_numeric($_GET["modify"])) {
  	$pid = $_GET["modify"];
- 	$mod_query = "UPDATE {$mysql_prefix}_players SET first_name='$_POST[p_fn]', last_name='$_POST[p_ln]'" .
+ 	$mod_query = "UPDATE {$mysql_prefix}_players SET first_name='$_POST[p_fn]', last_name='$_POST[p_ln]', naqtid='$_POST[naqtid]'" .
  			"			WHERE id=$pid";
  	query($mod_query) or die(mysql_error());
  	print "Applied changes";
