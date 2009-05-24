@@ -7,12 +7,15 @@
 function migrate($new_rev) {
     // Revisions are introduced in rev 36
 
+    // This is an array of migrations to apply. The key is the SVN revision that
+    // requires the change, and the value is an array of changes to make.
     $migrations = array(
         36 => array("CREATE TABLE qb_admin (rev int(11) NOT NULL)",
             "INSERT INTO qb_admin SET rev = 36;"),
         37 => array("PFX" => "ALTER TABLE PFX_rounds ADD COLUMN tiebreakers int(20) default NULL"),
         39 => array("PFX" => "ALTER TABLE PFX_teams ADD COLUMN bracket int(20) default NULL"),
-        41 => array("PFX" => "ALTER TABLE PFX_teams MODIFY bracket int(20) default 0 NOT NULL")
+        41 => array("PFX" => "ALTER TABLE PFX_teams MODIFY bracket int(20) default 0 NOT NULL"),
+        58 => array("PFX" => "ALTER TABLE PFX_players ADD COLUMN naqtid varchar(30) default NULL")
     );
 
     // The first step is to make sure that we have an admin database
