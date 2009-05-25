@@ -16,9 +16,25 @@ function link_player($name, $id) {
     return "<a href='stats_individual.php?t={$mysql_prefix}&player=$id'>$name</a>";
 }
 
+// things for dealing with NAQT database
 function link_player_naqt($id) {
     if(is_numeric($id))
         return "<p class='db-link'><a href='http://www.naqt.com/stats/player.jsp?contact_id=$id'>Player info at NAQT results database</a></p>";
+}
+
+function search_naqt($first_name, $last_name) {
+    $url = "http://www.naqt.com/stats/player-search.jsp?PASSBACK=PLAYER_SEARCH&FIRST_NAME={$first_name}&LAST_NAME={$last_name}";
+    $raw = file_get_contents($url);
+    $newlines = array("\t","\n","\r","\x20\x20","\0","\x0B");
+    $content = str_replace($newlines, "", html_entity_decode($raw));
+    $start = strpos($content,'contact_id');
+    $end = strpos($content,'</ul>',$start);
+    $list = substr($content,$start,$end-$start);
+    preg_match_all("|contact_id=(.*)\">(.*)</a> \((.*)\)|U",$list, $el, PREG_SET_ORDER);
+    $name = $el[2];
+    $id = $el[1];
+    $sch = strip_tags($el[3]);
+    return (array($name, $id, $sch));
 }
 
 // database wrappers
@@ -150,15 +166,6 @@ class StatsTable {
     function table() {
         if($this->sort) {
             $sort_id = "sort";
-        $final = <<<EOS
- <script language="javascript">
-$(document).ready(function() 
-    { 
-        $(".sort").tablesorter({widgets: ['zebra']});
-    } 
-);
- </script>
-EOS;
         }
         $final .= "<table class='$this->class $sort_id'>\n";
         $final .= $this->html;
