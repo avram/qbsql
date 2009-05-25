@@ -1,3 +1,10 @@
+// sorter
+$(document).ready(function() 
+    {
+        $(".sort").tablesorter({widgets: ['zebra']});
+    } 
+);
+
 // Custom layout from (MIT & GPL dual licensed):
 // 		Jean-Francois Hovinne (jf.hovinne a-t wymeditor dotorg)
 // http://files.wymeditor.org/wymeditor/trunk/src/examples/12-custom-layout.html

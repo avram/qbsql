@@ -15,16 +15,24 @@
  // If they've asked for a player detail, give it to them
  if (isset($_GET["player"]) && is_numeric($_GET["player"])) {
      $playerid=$_GET["player"];
-     $res_players = query("SELECT CONCAT({$mysql_prefix}_players.first_name, ' ', {$mysql_prefix}_players.last_name),
+     $res_players = query("SELECT {$mysql_prefix}_players.first_name, {$mysql_prefix}_players.last_name,
                 {$mysql_prefix}_teams.full_name, {$mysql_prefix}_teams.id, {$mysql_prefix}_players.naqtid
                 FROM {$mysql_prefix}_players, {$mysql_prefix}_teams
                 WHERE {$mysql_prefix}_players.id='$playerid'
                     AND {$mysql_prefix}_players.team = {$mysql_prefix}_teams.id") or die("could not get player info:".mysql_error());
-     list($playername, $teamname, $teamid, $naqtid) = fetch_row($res_players);
+     list($fname, $lname, $teamname, $teamid, $naqtid) = fetch_row($res_players);
+     $playername = "$fname $lname";
      $edit_str = ($auth) ? "<a class='edit-player' href='roster_modify.php?edit=$playerid&t={$mysql_prefix}'>Edit</a>" : "";
      print "<h2>$playername (<a href='stats_team.php?t={$mysql_prefix}&team=$teamid'>$teamname</a>) $edit_str</h2>";
      free_result($res_players);
-
+/*
+     $naqt = search_naqt($fname, $lname);
+     print_r($naqt);
+     if(is_numeric($naqt[1])) {
+         print "<p>Is this '$naqt[0]', who played for " . join($naqt[2], ' and ') . "?</p>";
+         print link_player_naqt($naqt[1]);
+     }
+ */
  $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",r.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";
  $detail = ", CONCAT(\"<a href='game_detail.php?game=\",r.game_id,\"&t=$mysql_prefix'>Detail</a>\")";
 
