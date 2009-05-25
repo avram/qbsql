@@ -43,6 +43,16 @@ table thead tr.winner th {
     background-color: #cc0;
 }
 
+tr.winner th a, tr.loser th a {
+    text-decoration: none;
+    color: white;
+}
+
+tr.winner th a:hover, tr.loser th a:hover {
+    text-decoration: underline;
+    color: gray;
+}
+
 table thead tr.loser th {
     background-color: #44c;
 }
@@ -104,9 +114,11 @@ p#powered {
 }
 
 /* Styling the tournament list */
-li.tourney-list p {
+li.tourney-list {
+    background: #dcdcff;
+}
+li.tourney-list p, li.tourney-list li {
     font-size: 70%;
-    background: #cce;
     padding-right: 3px;
     padding-left: 3px;
     margin-right: 6em;
