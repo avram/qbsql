@@ -56,7 +56,7 @@
         AND rp.player_id = '$playerid'
         AND rp.game_id = r.game_id
         ORDER BY r.id ASC") or die(mysql_error());
-     table($res1,array("Round","Opponent","Result","15","10","-5","Pts.","P/N", "TUH","Detail"),9,TRUE,FALSE,"stats",array());
+     table($res1,array("Round","Opponent","Result","15","10","-5","Pts.","P/N", "TUH","Detail"),9,TRUE,FALSE,"stats",array("sort"=>""));
     free_result($res1);
     print link_player_naqt($naqtid);
  }

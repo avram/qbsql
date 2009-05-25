@@ -13,7 +13,7 @@ require "head.php";			// Generate header as appropriate
 print "<ul>\n";
 $res = query("SELECT name, prefix, locked, description FROM tournaments ORDER BY id DESC");
 while (list($name, $prefix, $lock, $desc)=fetch_row($res)) {
-    print "<li class='tourney-list'><a href='index.php?t=$prefix'>$name</a> &mdash; $desc</li>\n";
+    print "<li class='tourney-list'><a href='index.php?t=$prefix'>$name</a><div>$desc</div></li>\n";
 }
 print "</ul>";
 ?>

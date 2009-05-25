@@ -130,7 +130,7 @@ $l_query = "SELECT SUM(rp.tossups),
 	 <table>
 	  <thead>
 	   <tr class="<?=$winstyle?>">
-	    <th colspan="7" class="team"><?=$winner[1]?> (<?=$wintext?>)</th>
+	    <th colspan="7" class="team"><?=link_team($winner[1], $winner[2])?> (<?=$wintext?>)</th>
 	   </tr>
 	   <tr>
 	    <th>Name</th>
@@ -146,7 +146,7 @@ $l_query = "SELECT SUM(rp.tossups),
 <?php
      while(list($name,$id, $tuh, $pow, $tup, $neg, $pn, $tot) = fetch_row($w_res)){
 	 echo "<tr>
-	     <td>$name</td>
+	     <td>".link_player($name,$id)."</td>
 	     <td>$tuh</td>
 	     <td>$pow</td>
 	     <td>$tup</td>
@@ -176,7 +176,7 @@ $l_query = "SELECT SUM(rp.tossups),
 <tbody><tr class="empty"><td colspan="7"></td></tr></tbody>
 	  <thead>
 	   <tr class="<?=$loserstyle?>">
-	    <th colspan="7" class="team"><?=$loser[1]?> (<?=$losertext?>)</th>
+	    <th colspan="7" class="team"><?=link_team($loser[1],$loser[2])?> (<?=$losertext?>)</th>
 	   </tr>
 	   <tr>
 	    <th>Name</th>
@@ -192,7 +192,7 @@ $l_query = "SELECT SUM(rp.tossups),
 <?php
      while(list($name,$id, $tuh, $pow, $tup, $neg, $pn, $tot) = fetch_row($l_res)){
 	 echo "<tr>
-	     <td>$name</td>
+	     <td>".link_player($name,$id)."</td>
 	     <td>$tuh</td>
 	     <td>$pow</td>
 	     <td>$tup</td>
