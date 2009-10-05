@@ -299,6 +299,7 @@ function table_create_queries($prefix) {
 CREATE TABLE {$prefix}_players (
   last_name varchar(40) default NULL,
   first_name varchar(40) default NULL,
+  naqtid varchar(30) default NULL,
   short_name varchar(40) default NULL,
   team int(20) NOT NULL default '0',
   id int(20) NOT NULL auto_increment,

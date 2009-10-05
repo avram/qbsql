@@ -17,6 +17,7 @@
          ($_POST["master_pw"] == $master_password);
      $confirm = ($_POST["pw"] == $_POST["pw2"]);
      $prefix_ok = !preg_match("/[^a-zA-Z0-9_]/", $_POST["prefix"]);
+     $name_bad = strstr("PFX", $_POST["name"]); // prevent migration scripts from breaking
      
      if($prefix_ok) {
          $res = query("SELECT * FROM tournaments WHERE prefix = '$_POST[prefix]'");
@@ -24,7 +25,7 @@
              $prefix_ok = false;
      }
      
-     if ($master && $confirm && $prefix_ok && is_numeric($_POST["len"])) {
+     if ($master && $confirm && $prefix_ok && is_numeric($_POST["len"]) && !$name_bad) {
          // We've checked all the input.
          query("INSERT INTO tournaments SET name = '$_POST[name]',
                     prefix = '$_POST[prefix]', username = '$_POST[un]',

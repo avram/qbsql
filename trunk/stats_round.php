@@ -58,6 +58,28 @@ $js_includes = true;
 			ORDER BY "."$mysql_prefix"."_rounds.id ASC") or die(mysql_error());
      table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array("sort"));
      free_result($res1);
+
+print "<h2>Round Report</h2>\n";
+      $res1=query("
+SELECT
+rnds.id,
+rnds.pts/rnds.tuhct*10,
+tut.tup/rnds.tuhct,
+(rnds.pts-tut.tup)/tut.tuc as bpts
+                            FROM
+                            (SELECT SUM(powers*15+tossups*10+negs*(-5)) as tup,
+                    SUM(powers+tossups) as tuc,
+                    SUM(powers) as pow,
+                    SUM(negs) AS neg,
+                    SUM(tossups) as tups,
+                    round_id
+                    FROM {$mysql_prefix}_rounds_players
+                                GROUP BY {$mysql_prefix}_rounds_players.round_id) AS tut,
+(SELECT rnd.id, SUM(rnd.score1+rnd.score2) as pts,
+SUM(rnd.tu_heard) AS tuhct, COUNT(*)*2 AS teams
+FROM {$mysql_prefix}_rounds AS rnd GROUP BY rnd.id) AS rnds
+				WHERE rnds.id=tut.round_id") or die(mysql_error());
+     table($res1,array("Round","PP20TUH/Team","TUPts/TUH","Bconv"),4,TRUE,FALSE,"stats",array("sort"));
  
  require "foot.php";			// finish off page
 ?>
