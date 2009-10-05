@@ -17,7 +17,7 @@
          ($_POST["master_pw"] == $master_password);
      $confirm = ($_POST["pw"] == $_POST["pw2"]);
      $prefix_ok = !preg_match("/[^a-zA-Z0-9_]/", $_POST["prefix"]);
-     $name_bad = strstr("PFX", $_POST["name"]); // prevent migration scripts from breaking
+     $prefix_ok = $prefix_ok && !strstr("PFX", $_POST["prefix"]); // prevent migration scripts from breaking
      
      if($prefix_ok) {
          $res = query("SELECT * FROM tournaments WHERE prefix = '$_POST[prefix]'");
