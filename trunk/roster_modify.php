@@ -66,19 +66,55 @@
  	$pid = $_GET["modify"];
  	$mod_query = "UPDATE {$mysql_prefix}_players SET first_name='$_POST[p_fn]', last_name='$_POST[p_ln]', naqtid='$_POST[naqtid]'" .
  			"			WHERE id=$pid";
- 	query($mod_query) or die(mysql_error());
- 	print "Applied changes";
+ 	query($mod_query) or dbwarning("Error updating players.",$mod_query);
+ 	message("Applied changes");
+ } else if ($_GET["action"]=="link") {
+ 	// Process NAQT data linking.
+ 	 foreach($_POST["linkdata"] as $link) {
+ 	 	$l = explode(":",$link);
+ 	 	$query = "UPDATE {$mysql_prefix}_players
+ 	 			SET naqtid='$l[1]' WHERE id='$l[0]' LIMIT 1";
+ 	 	query($query) or dbwarning("Error adding NAQT IDs.",$query);
+ 	 }
+ 	 message("NAQT IDs added.");
  } else if ($_GET["action"]=="add_players") {
      $team_id = $_POST["team_id"];
      $i = 0;
+     $j = 0;
+     $player_ids = array();
      foreach($_POST["last"] as $player_last) {
-	 $player_first = $_POST["first"][$i];
-	 if (($player_first != "") && ($player_last != "")) { 
-	     query("INSERT INTO "."$mysql_prefix"."_players SET last_name=\"$player_last\",first_name=\"$player_first\",team=\"$team_id\"");
-	     $i++;
-	 } 
+	 $player_first = $_POST["first"][$j];
+	 if (!(($player_first == "") && ($player_last == ""))) { 
+	    $query = "INSERT INTO {$mysql_prefix}_players SET last_name=\"$player_last\",first_name=\"$player_first\",team=\"$team_id\""; 
+	 	query($query) or dbwarning("Error adding players.",$query);
+	 	$player_ids[$j] = mysql_insert_id();
+	    $i++;
+	 }
+	 $j++; 
      }
      message("$i player(s) added without incident.");
+     
+     // NAQT integration
+     print "<div class='resultdb'>\n"; 
+     print "<h3>Potential matches in NAQT database</h3>\n";
+     print "<p>Check the boxes next to correct matches and click 'Link Records' to match players to the NAQT database.</p>";
+    $i = 0;
+	print "<form action='?t={$mysql_prefix}&action=link' method='post'><ul>\n";
+    foreach($_POST["last"] as $lname) {
+		$fname = $_POST["first"][$i];
+		if($fname != "" && $lname != "") {
+		$naqt = search_naqt($fname, $lname);
+     	if(is_numeric($naqt[1])) {
+     	print "<li>";
+		print "<input type='checkbox' value='{$player_ids[$i]}:$naqt[1]' name='linkdata[]' />";
+        	print "<p>Is $fname $lname the same as '$naqt[0]', who played for $naqt[2]?</p>";
+         	print link_player_naqt($naqt[1]);
+		print "</li>";
+     	}}
+     	$i++;
+	}
+     print "</ul><p><input type='submit' value='Link Records' /></p></form></div>\n";
+     
  } else {  // We present to form to add new players.
   // see if we have any teams
  $tm_res = query("SELECT COUNT(*) FROM {$mysql_prefix}_teams");
