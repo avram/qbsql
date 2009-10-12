@@ -24,16 +24,16 @@ function link_player_naqt($id) {
 
 function search_naqt($first_name, $last_name) {
     $url = "http://www.naqt.com/stats/player-search.jsp?PASSBACK=PLAYER_SEARCH&FIRST_NAME={$first_name}&LAST_NAME={$last_name}";
-    $raw = file_get_contents($url);
+    $raw = file_get_contents($url) or warning("NAQT database not accessible.");
     $newlines = array("\t","\n","\r","\x20\x20","\0","\x0B");
     $content = str_replace($newlines, "", html_entity_decode($raw));
     $start = strpos($content,'contact_id');
     $end = strpos($content,'</ul>',$start);
     $list = substr($content,$start,$end-$start);
-    preg_match_all("|contact_id=(.*)\">(.*)</a> \((.*)\)|U",$list, $el, PREG_SET_ORDER);
-    $name = $el[2];
-    $id = $el[1];
-    $sch = strip_tags($el[3]);
+    preg_match_all("|contact_id=(\d+)\">(.*)</a> \((.*)\)|U",$list, $el, PREG_SET_ORDER);
+    $name = $el[0][2];
+    $id = $el[0][1];
+    $sch = strip_tags($el[0][3]);
     return (array($name, $id, $sch));
 }
 
@@ -104,7 +104,6 @@ function close($link) {
 function powered_by() {
     echo '<p id="powered">Tournament stats powered by <a href="http://code.google.com/p/qbsql/"><tt>qbsql</tt></a>.</p>'."\n";
 }
-
 /* check_auth (string, string)
  * 
  * Checks password with the known hash, to allow or deny access to database.
