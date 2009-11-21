@@ -15,8 +15,9 @@ function migrate($new_rev) {
         37 => array("PFX" => "ALTER TABLE PFX_rounds ADD COLUMN tiebreakers int(20) default NULL"),
         39 => array("PFX" => "ALTER TABLE PFX_teams ADD COLUMN bracket int(20) default NULL"),
         41 => array("PFX" => "ALTER TABLE PFX_teams MODIFY bracket int(20) default 0 NOT NULL"),
-        58 => array("PFX" => "ALTER TABLE PFX_players ADD COLUMN naqtid varchar(30) default NULL")
-    );
+        58 => array("PFX" => "ALTER TABLE PFX_players ADD COLUMN naqtid varchar(30) default NULL"),
+		65 => array("PFX" => "ALTER TABLE PFX_rounds ADD COLUMN forfeit int(20) default NULL")
+     );
 
     // The first step is to make sure that we have an admin database
     $query = "SHOW TABLES LIKE 'qb_admin'";

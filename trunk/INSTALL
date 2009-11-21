@@ -37,6 +37,9 @@ Installation
 
    5. Pull up the page index.php in your web browser. You should be redirected to the Tournament List.
    6. Create a new tournament. The master password is the one you set in config.php
+   7. If you would like to make changes to the stylesheet, apply them to local.css;
+   	  it will not be updated in the repository, so any changes you make will not be
+   	  overwritten by changes to the basic styling of qbsql. 
 
 Creating Tournaments
    1. -----

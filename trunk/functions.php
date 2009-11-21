@@ -243,6 +243,20 @@ function dbwarning($message, $query) {
     warning("$message (".mysql_errno().") $additional");
 }
 
+/* Creates a database error warning. Observes debug mode */
+/* Halts execution after displaying error. */
+function dberror($message, $query) {
+	global $debug;
+
+    if ($debug)
+        $additional = "<tt>".mysql_error()."</tt><pre class='db-error-query'>$query</pre>";
+    else
+        $additional = "";
+
+    print("$message (".mysql_errno().") $additional");
+    die();
+}
+
 /* creates a nice little warning box with the given text 
  warning("That's incorrect input");
  warning("You need to create teams first.", "Go to 'Add Teams'", "add_teams.php"); */
@@ -382,10 +396,20 @@ function export_database() {
     }
 }
 
+/*
+ * This export function is based on R. Hentzel's description of the SQBS
+ * data file format, and tested against the NAQT results importer. The file
+ * created by the exporter has not been tested against SQBS itself, and
+ * probably cannot be read by SQBS. It does, however, work with the NAQT
+ * importer.
+ * 
+ * The SQBS data format is a series of newline-separated fields.
+ */
 function sqbs_export_tourney($prefix) {
     $sqbs = "";
     $res = query("SELECT COUNT(*) FROM {$prefix}_teams");
     list($t_ct) = fetch_row($res);
+     
     $sqbs .= "$t_ct\n";
 
     $tm_id_to_index = array();
@@ -393,6 +417,13 @@ function sqbs_export_tourney($prefix) {
 
     $t_index = 0;
 
+    /*
+     * The first thing we need to do is give each team a number, from 0-N
+     * for N teams. Then each player on each team needs a number, from 0-M
+     * for M players. We'll keep track of which player and team has what index
+     * using two hashes-- one from QBSQL team IDs to SQBS indices, and one from
+     * QBSQL player IDs to SQBS indices, $tm_id_to_index and $p_id_to_index.
+     */
     $t_res = query("SELECT full_name, id FROM {$prefix}_teams ORDER BY full_name");
     while(list($tname, $tid) = fetch_row($t_res)) {
         $p_ct_res = query("SELECT COUNT(*) FROM {$prefix}_players WHERE team='$tid'");
@@ -415,19 +446,22 @@ function sqbs_export_tourney($prefix) {
         }
     }
 
+    // We don't ordinary keep a count of games, so we need to count them.
     $g_ct_res = query("SELECT COUNT(*) FROM {$prefix}_rounds");
     list($g_ct) = fetch_row($g_ct_res);
     $sqbs .= "$g_ct\n";
 
+    // This little beast gets all of the game data.
     $g_res = query("SELECT team1, team2, score1, score2, tu_heard, r.id,
-                        t1.bons, t1.tuppts, t2.bons, t2.tuppts, r.game_id
+                        t1.bons, t1.tuppts, t2.bons, t2.tuppts, r.game_id,
+                        r.forfeit
                     FROM {$prefix}_rounds AS r,
                     (SELECT SUM(tossups+powers) AS bons, SUM(tossups*10+powers*15-negs*5) AS tuppts, game_id, team_id
                         FROM {$prefix}_rounds_players GROUP BY game_id, team_id) AS t1,
                     (SELECT SUM(tossups+powers) AS bons, SUM(tossups*10+powers*15-negs*5) AS tuppts, game_id, team_id
                         FROM {$prefix}_rounds_players GROUP BY game_id, team_id) AS t2
                     WHERE t1.team_id = team1 AND t2.team_id = team2 AND t1.game_id=r.game_id AND t2.game_id=r.game_id ORDER BY r.id") or die(mysql_error());
-    while(list($t1,$t2, $sc1, $sc2, $tuh, $rnd, $bons1, $tuppts1, $bons2, $tuppts2, $game) = fetch_row($g_res)) {
+    while(list($t1,$t2, $sc1, $sc2, $tuh, $rnd, $bons1, $tuppts1, $bons2, $tuppts2, $game, $forfeit) = fetch_row($g_res)) {
         $sqbs .= "$game\n";                     // unique identifier for game
         $sqbs .= $tm_id_to_index[$t1]."\n";     // index of team 1
         $sqbs .= $tm_id_to_index[$t2]."\n";     // index of team 2
@@ -439,10 +473,15 @@ function sqbs_export_tourney($prefix) {
         $sqbs .= ($sc1-$tuppts1)."\n";          // team1 bonus pts
         $sqbs .= "$bons2\n";
         $sqbs .= ($sc2-$tuppts2)."\n";
+        /* The next four values should be maintained by QBSQL, but we don't
+         * yet support them. */
         $sqbs .= "0\n";                         // overtime (1=yes, 0=no)
         $sqbs .= "0\n";                         // team1 # correct OT tups
         $sqbs .= "0\n";                         // team2  --same--
-        $sqbs .= "0\n";                         // forfeit (1=team1 forfeit, 0=no)
+        $forfeit = ($forfeit == $t1) ? 1 : 0; 	// FIXME We cannot rely on the first
+        										// team always being the forfeiting one.
+        $sqbs .= "$forfeit\n";                  // forfeit (1=team1 forfeit, 0=no)
+        /* The next two values are unlikely to be supported by QBSQL */
         $sqbs .= "0\n";         // lightning t1 pts
         $sqbs .= "0\n";         // lightning t2 pts
 
@@ -451,6 +490,8 @@ function sqbs_export_tourney($prefix) {
         $p_buffer = 0;
         // Now the player scores, team 2
         $p2_res_sc = query("SELECT tu_heard, powers, tossups, negs, player_id FROM {$prefix}_rounds_players WHERE game_id = '$game' AND team_id='$t2'") or die(mysql_error());
+        /* SQBS requires that there be 7 player lines per team */
+        /* unneeded player lines are filled with zeroes */
         while ($p_buffer <= 7) {
             if(list($p_tuh, $pows, $tups, $negs, $pid) = fetch_row($p1_res_sc)) {
                 $sqbs .= $p_id_to_index[$pid]."\n"; // player index of player1
@@ -476,6 +517,9 @@ function sqbs_export_tourney($prefix) {
             }
             $p_buffer++;
         }
+        /* The SQBS data file has more here, but we don't need it to work with the
+         * NAQT results database.
+         */
     }
 
     return $sqbs;
