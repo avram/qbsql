@@ -17,7 +17,8 @@
                         t2.full_name AS t2_full,
                         t2.id AS t2_id,
                         rounds.score2 AS t2_score,
-                        rounds.id as id
+                        rounds.id as id,
+                        rounds.forfeit as forfeit
                     FROM {$mysql_prefix}_rounds AS rounds,
                         {$mysql_prefix}_teams AS t1,
                         {$mysql_prefix}_teams AS t2
@@ -26,13 +27,13 @@
                         AND t2.id = rounds.team2
                     LIMIT 1");
     if($round = fetch_row($res)) {
-        list($t1, $f1, $id1, $sc1, $t2, $f2, $id2, $sc2, $rid) = $round;
+        list($t1, $f1, $id1, $sc1, $t2, $f2, $id2, $sc2, $rid, $forfeit) = $round;
         $title .= ": $t1 vs. $t2, Round $rid";
         // see who won
-        if ($sc1 > $sc2) {
+        if ($sc1 > $sc2 || $forfeit == $id2) {
             $winner = array($t1, $f1, $id1, $sc1);
             $loser = array($t2, $f2, $id2, $sc2);
-        } elseif ($sc2 > $sc1) {
+        } elseif ($sc2 > $sc1 || $forfeit == $id1) {
             $loser = array($t1, $f1, $id1, $sc1);
             $winner = array($t2, $f2, $id2, $sc2);
         } else {
@@ -60,7 +61,7 @@ if($auth) {
 $winstyle = "winner";
 $wintext = "W";
 $loserstyle = "loser";
-$losertext = "L";
+$losertext = (!$forfeit) ? "L" : "Forfeit";
 if($draw) {
     $winstyle = "draw";
     $loserstyle = "draw";
@@ -69,6 +70,7 @@ if($draw) {
 }
 
 // round data
+if(!$forfeit){
 $w_query = "SELECT SUM(rp.tossups),
                 SUM(rp.negs),
                 SUM(rp.powers),
@@ -108,6 +110,7 @@ $l_query = "SELECT SUM(rp.tossups),
                             {$mysql_prefix}_rounds_players AS rp
                         WHERE p.id=rp.player_id AND rp.game_id='$id'
                             AND rp.team_id = '$winner[2]'
+                            AND rp.tu_heard > 0
                         ORDER BY p.last_name, p.first_name";
 
 
@@ -124,8 +127,10 @@ $l_query = "SELECT SUM(rp.tossups),
                             {$mysql_prefix}_rounds_players AS rp
                         WHERE p.id=rp.player_id AND rp.game_id='$id'
                             AND rp.team_id = '$loser[2]'
+                            AND rp.tu_heard > 0
                         ORDER BY p.last_name, p.first_name";
         $l_res = query($l_query) or die(mysql_error());
+}
 ?>
 	 <table>
 	  <thead>
@@ -144,6 +149,7 @@ $l_query = "SELECT SUM(rp.tossups),
 	  </thead>
 	  <tbody>
 <?php
+	if(!$forfeit) {
      while(list($name,$id, $tuh, $pow, $tup, $neg, $pn, $tot) = fetch_row($w_res)){
 	 echo "<tr>
 	     <td>".link_player($name,$id)."</td>
@@ -172,6 +178,9 @@ $l_query = "SELECT SUM(rp.tossups),
 	    <th>Points</th>
 	    <td><?=$winner[3]?></td>
 	   </tr>
+<?php  } else { // end of non-forfeit clause ?>
+	<tr><td colspan="7">No player statistics.</td></tr>
+<?php } // end of forfeit clause ?>
 </tbody>
 <tbody><tr class="empty"><td colspan="7"></td></tr></tbody>
 	  <thead>
@@ -190,6 +199,7 @@ $l_query = "SELECT SUM(rp.tossups),
 	  </thead>
 	  <tbody>
 <?php
+	if (!$forfeit) {
      while(list($name,$id, $tuh, $pow, $tup, $neg, $pn, $tot) = fetch_row($l_res)){
 	 echo "<tr>
 	     <td>".link_player($name,$id)."</td>
@@ -218,6 +228,9 @@ $l_query = "SELECT SUM(rp.tossups),
 	    <th>Points</th>
 	    <td><?=$loser[3]?></td>
 	   </tr>
+<?php  } else { // end of non-forfeit clause ?>
+	<tr><td colspan="7">No player statistics.</td></tr>
+<?php } // end of forfeit clause ?>
      </tbody>
     </table>
 <?php

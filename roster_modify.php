@@ -133,7 +133,7 @@
 	else
 		$sel_team = "-1";
     // We need to get the list of teams to present a drop-down menu of them
-     $res = query("SELECT full_name,id FROM "."$mysql_prefix"."_teams ORDER BY full_name") or die(mysql_error());
+     $res = query("SELECT full_name,id FROM {$mysql_prefix}_teams ORDER BY full_name") or die(mysql_error());
      while(list($team_name,$team_id) = fetch_row($res)) {
 	 	$selected = ($sel_team==$team_id) ? "selected" : "";
 	 	echo "<option value=\"$team_id\" $selected>$team_name</option>\n";

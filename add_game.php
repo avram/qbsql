@@ -11,7 +11,7 @@
  $title="Add game";
  require "head.php";			// Generate header as appropriate
 
- // if we have two distinct teams and round, we should show the stats screen
+ 
  if(isset($_GET["delete"]) && is_numeric($_GET["delete"])) {
  	if($_POST["confirm"] == "yes") {
  		// get game info so we can tell them what we did
@@ -21,13 +21,16 @@
  				"	{$mysql_prefix}_teams AS t2" .
  				" WHERE t1.id=rounds.team1 AND t2.id=rounds.team2" .
  				"	AND rounds.game_id=$_GET[delete] LIMIT 1";
- 		$res = query($query) or die("Failed with query: <pre>$query \n error: ".mysql_error()."</pre>");
+ 		$res = query($query)
+ 				or dberror("Delete failed; could not fetch game data.", $query);
  		list($team1, $team2, $round) = fetch_row($res);
  		free_result($res);
  		$round_del = "DELETE FROM {$mysql_prefix}_rounds WHERE game_id='$_GET[delete]' LIMIT 1";
  		$indiv_del = "DELETE FROM {$mysql_prefix}_rounds_players WHERE game_id='$_GET[delete]'";
- 		query($round_del) or die("Failed to delete round data; db should be untouched: ".mysql_error());
- 		query($indiv_del) or die("Failed to delete indiv data; there may be orphaned rows in rounds_players: ".mysql_error());  
+ 		query($round_del)
+ 			or dberror("Failed to delete round data; db should be untouched.",$query);
+ 		query($indiv_del)
+ 			or dberror("Failed to delete indiv data; there may be orphaned rows in rounds_players: ".mysql_error());  
  		message("Deleted round $round, $team1 vs. $team2");
  	} else {
  		$_GET["edit"] = $_GET["delete"];
@@ -83,19 +86,66 @@
  		print "Invalid inputs";
  	}
  }
+ /* This is the normal new game logic */
+ // if we have two distinct teams and round, we should show the stats screen
  if (($_GET["team1"] != $_GET["team2"]) && $_GET["round"]) {
      $round = $_GET["round"];		// move GET vars to normal vars.
      $team1_id = $_GET["team1"];
      $team2_id = $_GET["team2"];
+     
+     $logic = false;
+     
+     // check logical validity
+     // distinct teams, no previous games this round
+     if($team1_id != $team2_id) {
+         $query = "SELECT COUNT(*) FROM {$mysql_prefix}_rounds
+             WHERE (team1='$team1_id' OR team2='$team2_id') AND id='$round'";
+         $res = query($query);
+         list($count) = fetch_row($res);
+         if($count == 0)
+             $logic = true;
+         else
+             warning("One or more of the teams already has a game entered for this round.");
+     } else
+         warning("The two teams must be distinct.");
 
      // pull team names from DB
-     list($team1) = fetch_row(query("SELECT full_name FROM "."$mysql_prefix"."_teams WHERE id=\"$team1_id\" LIMIT 1"));
-     list($team2) = fetch_row(query("SELECT full_name FROM "."$mysql_prefix"."_teams WHERE id=\"$team2_id\" LIMIT 1"));
+     list($team1) = fetch_row(query("SELECT full_name FROM {$mysql_prefix}_teams WHERE id=\"$team1_id\" LIMIT 1"));
+     list($team2) = fetch_row(query("SELECT full_name FROM {$mysql_prefix}_teams WHERE id=\"$team2_id\" LIMIT 1"));
      
+     /* Handle forfeits */
+     if($logic && $_GET["forfeit"]) {
+     	// We assign a win to team 1.
+     	$query = "INSERT INTO {$mysql_prefix}_rounds SET team1 = '$team1_id',
+     				team2 = '$team2_id', tu_heard = '0', id = '$round', forfeit = '$team1_id'";
+        query($query) or dbwarning("Failed to add forfeit.", $query);
+        
+        $game_id = mysql_insert_id();
+        
+        // To simplify issues, we're adding blank player records for
+        // forfeited rounds. But this is something of a hack-- it would be
+        // better to fix the queries elsewhere to use LEFT JOINS
+        $res1 = query("SELECT id FROM {$mysql_prefix}_players WHERE team=\"$team1_id\" ORDER BY last_name");
+		$res2 = query("SELECT id FROM {$mysql_prefix}_players WHERE team=\"$team2_id\" ORDER BY last_name");
+        
+		while(list($pid) = fetch_row($res1)){ 
+	 		$play_query =  "INSERT INTO {$mysql_prefix}_rounds_players
+	 					SET player_id='$pid' , team_id='$team1_id',
+	 						round_id='$round', tu_heard='0', game_id='$game_id'";
+	 		query($play_query) or dbwarning("Choked adding team 1 records", $play_query);
+     	}
+     	while(list($pid) = fetch_row($res2)){ 
+	 		$play_query =  "INSERT INTO {$mysql_prefix}_rounds_players
+	 					SET player_id='$pid' , team_id='$team2_id',
+	 						round_id='$round', tu_heard='0', game_id='$game_id'";
+	 		query($play_query) or dbwarning("Choked adding team 2 records", $play_query);
+     	}
+     	message("The forfeit was recorded.");
+     } else if ($logic) {     
      // pull rosters from DB
-     $res1 = query("SELECT last_name,first_name,id FROM "."$mysql_prefix"."_players WHERE team=\"$team1_id\" ORDER BY last_name");
+     $res1 = query("SELECT last_name,first_name,id FROM {$mysql_prefix}_players WHERE team=\"$team1_id\" ORDER BY last_name");
      
-     $res2 = query("SELECT last_name,first_name,id FROM "."$mysql_prefix"."_players WHERE team=\"$team2_id\" ORDER BY last_name");
+     $res2 = query("SELECT last_name,first_name,id FROM {$mysql_prefix}_players WHERE team=\"$team2_id\" ORDER BY last_name");
      
      echo "
 	 <h2>Round $round, $team1 vs. $team2</h2>
@@ -167,17 +217,20 @@
 	 </form>";
     mysql_free_result($res1);
     mysql_free_result($res2);
+   }
  } else if ($_GET["submit"]=="bork") {
      // check data integrity
      $integrity = (is_numeric($_POST["team1_id"]) && is_numeric($_POST["team2_id"])
           && is_numeric($_POST["team1_score"]) && is_numeric($_POST["team2_score"])
               && is_numeric($_POST["total_tuh"]) && is_numeric($_POST["round"]));
      if (!$integrity)
-         die("Invalid scores. Go back and try again.");
+         warning("Invalid scores. Go back and try again.");
 
+     $logic = false;
+     
      // check logical validity
      // distinct teams, no previous games this round
-     if($_POST["team1_id"] != $_POST["team2_id"]) {
+     if($integrity && $_POST["team1_id"] != $_POST["team2_id"]) {
          $query = "SELECT COUNT(*) FROM {$mysql_prefix}_rounds
              WHERE (team1='$_POST[team1_id]' OR team2='$_POST[team2_id]') AND id='$_POST[round]'";
          $res = query($query);
@@ -185,17 +238,17 @@
          if($count == 0)
              $logic = true;
          else
-             die("One or more of the teams already has a game entered for this round.");
+             warning("One or more of the teams already has a game entered for this round.");
      } else
-         die("The two teams must be distinct.");
+         warning("The two teams must be distinct.");
 
-
+	if($logic) {
      // add to table "rounds"
      $rnd_query="INSERT INTO {$mysql_prefix}_rounds SET team1='$_POST[team1_id]',
                     team2='$_POST[team2_id]', score1='$_POST[team1_score]',
                     score2='$_POST[team2_score]', tu_heard='$_POST[total_tuh]',
                     id='$_POST[round]'";
-     query($rnd_query) or die("Choked adding round info: $rnd_query, probably lost individual stats");
+     query($rnd_query) or dberror("Choked adding round info, probably lost individual stats",$rnd_query);
 
      $game_id = mysql_insert_id(); 	
 
@@ -205,34 +258,42 @@
      // add to "rounds_players"
      for($i = 0;$i<$team1_num_players;$i++){ 
 	 	$id = $_POST["team1_id_num"][$i];
-	 	$play_query =  "INSERT INTO "."$mysql_prefix"."_rounds_players SET player_id=\"$id\" , team_id=\"$_POST[team1_id]\", powers=\"".$_POST["team1_pow"][$i]."\", tossups=\"".$_POST["team1_tu"][$i]."\", negs=\"".$_POST["team1_neg"][$i]."\", round_id=\"".$_POST["round"]."\", tu_heard=\"{$_POST["team1_tuh"][$i]}\", game_id=\"$game_id\"";
-	 	query($play_query) or die("Choked adding records: $play_query (probably lost team 2 records");
+	 	$play_query =  "INSERT INTO {$mysql_prefix}_rounds_players SET player_id=\"$id\" , team_id=\"$_POST[team1_id]\", powers=\"".$_POST["team1_pow"][$i]."\", tossups=\"".$_POST["team1_tu"][$i]."\", negs=\"".$_POST["team1_neg"][$i]."\", round_id=\"".$_POST["round"]."\", tu_heard=\"{$_POST["team1_tuh"][$i]}\", game_id=\"$game_id\"";
+	 	query($play_query) or dbwarning("Choked adding team 1 records", $play_query);
      }
      for($i = 0;$i<$team2_num_players;$i++){
          $id = $_POST["team2_id_num"][$i];
-         $play_query =  "INSERT INTO "."$mysql_prefix"."_rounds_players SET player_id=\"$id\" , team_id=\"$_POST[team2_id]\", powers=\"".$_POST["team2_pow"][$i]."\", tossups=\"".$_POST["team2_tu"][$i]."\", negs=\"".$_POST["team2_neg"][$i]."\", round_id=\"".$_POST["round"]."\", tu_heard=\"".$_POST["team2_tuh"][$i]."\", game_id=\"$game_id\"";
-         query($play_query) or die("Choked adding records: $play_query");
+         $play_query =  "INSERT INTO {$mysql_prefix}_rounds_players SET player_id=\"$id\" , team_id=\"$_POST[team2_id]\", powers=\"".$_POST["team2_pow"][$i]."\", tossups=\"".$_POST["team2_tu"][$i]."\", negs=\"".$_POST["team2_neg"][$i]."\", round_id=\"".$_POST["round"]."\", tu_heard=\"".$_POST["team2_tuh"][$i]."\", game_id=\"$game_id\"";
+         query($play_query) or dbwarning("Choked adding team 2 records",$play_query);
      } 
      message("The round was added successfully.");
+ 	}
  } else if(isset($_GET["edit"]) && is_numeric($_GET["edit"])) {
  	// now we edit the requested game
  	$game_id = $_GET["edit"];
  	
- 	print "<p><form action='?delete=$game_id&t=$mysql_prefix' method='POST'>" .
- 			"Confirm delete: <input type='checkbox' name='confirm' value='yes' />" .
- 			"<input type='submit' value='Delete this round' /></form></p>\n";
  	
  	// get the entry from the rounds table
- 	list($team1_name, $team2_name, $game_name, $team1_id, $team2_id, $team1_score, $team2_score, $tuh, $round_id) =
+ 	list($team1_name, $team2_name, $game_name, $team1_id, $team2_id, $team1_score, $team2_score, $tuh, $round_id, $forfeit) =
  			fetch_row(query("SELECT t1.full_name, t2.full_name, rounds.name, rounds.team1," .
  			"rounds.team2, rounds.score1, rounds.score2," .
- 			"rounds.tu_heard, rounds.id " .
+ 			"rounds.tu_heard, rounds.id, rounds.forfeit" .
  			"	FROM {$mysql_prefix}_rounds AS rounds, {$mysql_prefix}_teams AS t1, {$mysql_prefix}_teams AS t2 " .
  			"	WHERE rounds.game_id = $game_id AND " .
  			"		rounds.team1=t1.id AND " .
  			"		rounds.team2=t2.id"));
  	
+ 	print "<h2>Editing Round $round_id: $team1_name vs. $team2_name</h2>\n";
  	
+ 	print "<p><form action='?delete=$game_id&t=$mysql_prefix' method='POST'>" .
+ 			"Confirm delete: <input type='checkbox' name='confirm' value='yes' />" .
+ 			"<input type='submit' value='Delete this round' /></form></p>\n";
+ 	
+ 	if ($forfeit) {
+ 		echo "<p>Forfeits cannot be edited. Delete the game and re-add it to make changes.</p>";
+ 	} else {
+ 	/* Collect the information needed to display the game editor
+ 	 * and show it. */
  	// get all the individual stats
  	$team1_query = "SELECT {$mysql_prefix}_rounds_players.player_id, " .
  			"{$mysql_prefix}_rounds_players.team_id, {$mysql_prefix}_rounds_players.powers, " .
@@ -255,7 +316,6 @@
  			"		AND {$mysql_prefix}_rounds_players.player_id = {$mysql_prefix}_players.id";
  	$team2_res = query($team2_query) or die(mysql_error());
  	
- 	print "<h2>Editing Round $round_id: $team1_name vs. $team2_name</h2>\n";
 ?>
     <form action="?modify=<?=$game_id?>&t=<?=$mysql_prefix?>" method="POST">
    <h3>Points</h3>
@@ -326,25 +386,25 @@
 	 <input type=\"hidden\" value=\"$k\" name=\"team2_size\" />
 	 <input type=\"submit\" value=\"Apply changes\" />
   </form>";
- 	
- } else {				// show the team picker
+ 	} // end of if !($forfeit)
+ } else {
+/* We show the first step of adding a new game. */
+ // show the team picker
  // see if we have any teams
  $tm_res = query("SELECT COUNT(*) FROM {$mysql_prefix}_teams");
  list($num_teams) = fetch_row($tm_res);
  if($num_teams == 0) {
-?>
-     <div class="warning">
-      <p>There are no teams in the tournament. You must add teams before adding games.</p>
-      <p class="redirect"><a href="team_modify.php?t=<?=$mysql_prefix?>">Go to "Add Teams"</a></p>
-      </div>
-<?php } else { ?>
+ 	warning("There are no teams in the tournament. You must add teams before adding games.",
+ 			"Go to 'Add Teams'.", "team_modify.php");
+ } else { ?>
     <form action="" method="GET">
+    <p></p>
     <h2>Select teams</h2>
     <p>
     <select name="team1">
 <?php
     // We need to get the list of teams to present a drop-down menu of them
-     $res = query("SELECT full_name,id FROM "."$mysql_prefix"."_teams ORDER BY full_name");
+     $res = query("SELECT full_name,id FROM {$mysql_prefix}_teams ORDER BY full_name");
      while(list($team_name,$team_id) = fetch_row($res)) {
 	 echo "<option value=\"$team_id\">$team_name</option>\n";
      }
@@ -352,7 +412,7 @@
 ?>
      </select> versus <select name="team2">
 <?php
-     $res2 = query("SELECT full_name,id FROM "."$mysql_prefix"."_teams ORDER BY full_name");
+     $res2 = query("SELECT full_name,id FROM {$mysql_prefix}_teams ORDER BY full_name");
      while(list($team_name,$team_id) = fetch_row($res2)) {
 	 echo "<option value=\"$team_id\">$team_name</option>\n";
      }
@@ -361,9 +421,11 @@
       </select>
       Round: 
       <input type="text" size="5" name="round" />
-      <input type="hidden" value="<?=$mysql_prefix?>" name="t" />
       <input type="submit" value="Continue" />
-
+     </p>
+     <p>Forfeit in favor of first team:
+      <input type="checkbox" name="forfeit" />
+      <input type="hidden" value="<?=$mysql_prefix?>" name="t" />
      </p>
      </form>
 <?php

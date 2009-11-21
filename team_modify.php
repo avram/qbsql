@@ -64,6 +64,8 @@
  ?>
 
  <h2>Editing <?=$fn?></h2>
+ <p class="instructions">To delete a team, first delete all of games it has played,
+ then each of its players, then check the confirmation box below and click "Delete".</p>
  <form action="?delete=<?=$tid?>&t=<?=$mysql_prefix?>" method="post">
  <p id="delete"><input type="checkbox" name="confirm" value="yes" />
  	<input type="submit" value="Delete" /></p>
@@ -71,6 +73,9 @@
  <form action="?modify=<?=$tid?>&t=<?=$mysql_prefix?>" method="post">
  <p>Full Name: <input type="text" name="t_fn" size="12" value="<?=$fn?>" /></p>
  <p>Short Name: <input type="text" name="t_sn" size="12" value="<?=$sn?>" /></p>
+ <p class="instructions">The bracket field, if specified, should
+     be an integer. If no brackets are specified, then results will not be
+     broken down by bracket.</p>
  <p>Bracket: <input type="text" name="t_brk" size="5" value="<?=$brk?>" /> (leave blank if no bracket)</p>
  <p><input type="submit" value="Apply Changes" /></p>
  </form>
@@ -86,10 +91,12 @@
      $team_id = $_POST["team"];
      $i = 0;
      foreach($_POST["full"] as $team_full) {
-         if($team_full != "") {
-             // If short name undefined, use long name instead
+        if($team_full != "") {
+        // If short name undefined, use long name instead
 	    $team_short = ($_POST["short"][$i] != "") ? $_POST["short"][$i] : $team_full;
-            $bracket_query = is_numeric($_POST["t_brk"]) ? ", bracket = '$_POST[t_brk]'" : "";
+        // If a valid bracket is specified, add the appropriate piece to our query
+	    $bracket_query = is_numeric($_POST["bracket"][$i])
+        		? ", bracket = '{$_POST["bracket"][$i]}'" : "";
 	    query("INSERT INTO {$mysql_prefix}_teams SET full_name='$team_full', short_name='$team_short' $bracket_query"); 
 	    $i++;
 	 }
@@ -98,26 +105,38 @@
  } else { 
 ?>
      <form action="?action=add_teams&t=<?=$mysql_prefix?>" method="POST">
+     <p class="instructions">Enter the name and short names of
+     the teams to be added. Short names are optional, but they might be
+     helpful for teams with particularly long names that will look odd in
+     some parts of the interface.</p>
+     <p class="instructions">The bracket field, if specified, should
+     be an integer. If no brackets are specified, then results will not be
+     broken down by bracket.</p>
      <p class="form">
       <input type="text" disabled size="30" value="Team name" />
-      <input type="text" disabled size="30" value="Team short name" /> <br />
+      <input type="text" disabled size="30" value="Team short name" />
+      <input type="text" disabled size="4" value="Bracket" /><br />
       <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
+      <input type="text" size="30" name="short[]" />
+      <input type="text" size="4" name="bracket[]" /><br />
       <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
+      <input type="text" size="30" name="short[]" />
+      <input type="text" size="4" name="bracket[]" /><br />
       <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
+      <input type="text" size="30" name="short[]" />
+      <input type="text" size="4" name="bracket[]" /><br />
       <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
+      <input type="text" size="30" name="short[]" />
+      <input type="text" size="4" name="bracket[]" /><br />
       <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
+      <input type="text" size="30" name="short[]" />
+      <input type="text" size="4" name="bracket[]" /><br />
       <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
+      <input type="text" size="30" name="short[]" />
+      <input type="text" size="4" name="bracket[]" /><br />
       <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
-      <input type="text" size="30" name="full[]" />
-      <input type="text" size="30" name="short[]" /><br />
-
+      <input type="text" size="30" name="short[]" />
+      <input type="text" size="4" name="bracket[]" /><br />
       <input type="submit" value="Add teams" />
      </p>
     <p>To place teams in brackets, edit them individually and set the bracket numbers.</p>

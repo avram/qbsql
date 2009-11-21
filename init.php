@@ -2,15 +2,16 @@
 /* init.php */
 
     if (isset($_GET["kill"])) {
-	session_start();
-	session_destroy();
+		session_start();
+		session_destroy();
     }
     require_once("functions.php");
-    $link = connect($mysql_host,$mysql_username,$mysql_pass,$mysql_db) or die('Failed to connect to DB server.');
+    $link = connect($mysql_host,$mysql_username,$mysql_pass,$mysql_db)
+    		or die('Failed to connect to DB server.');
 
     // If we have a database migration, do it.
     /* Minimum db revision for this version of the code */
-    $required_rev = 58;
+    $required_rev = 65;
     require_once("migrations.php");
     migrate($required_rev);
 

@@ -27,15 +27,20 @@
      
      if ($master && $confirm && $prefix_ok && is_numeric($_POST["len"]) && !$name_bad) {
          // We've checked all the input.
-         query("INSERT INTO tournaments SET name = '$_POST[name]',
+         $query = "INSERT INTO tournaments SET name = '$_POST[name]',
                     prefix = '$_POST[prefix]', username = '$_POST[un]',
                     password = '$_POST[pw]', game_length = '$_POST[len]',
-                    description = '$_POST[desc]'") or die(mysql_error());
+                    description = '$_POST[desc]'";
+         query($query) or
+         	dbwarning("A database error occurred while adding the tournament.",
+         			  $query);
          $prefix = $_POST["prefix"];
 
          $queries = table_create_queries($prefix);
          foreach ($queries as $query) {
-             query($query) or die(mysql_error());
+             query($query) or
+             	dbwarning("A database error occurred while adding the tournament.",
+             			  $query);
          }
          
             // redirect to tournament list
@@ -48,7 +53,7 @@
 RED;
      }
      else
-         warning("An error occured. Double-check your input and try again.");
+         warning("An input validation error occurred. Double-check your input and try again, perhaps with a different prefix.");
  }
 
 
