@@ -115,9 +115,9 @@
      
      /* Handle forfeits */
      if($logic && $_GET["forfeit"]) {
-     	// We assign a win to team 1.
+     	// We assign a forfeit to team 2.
      	$query = "INSERT INTO {$mysql_prefix}_rounds SET team1 = '$team1_id',
-     				team2 = '$team2_id', tu_heard = '0', id = '$round', forfeit = '$team1_id'";
+     				team2 = '$team2_id', tu_heard = '0', id = '$round', forfeit = '$team2_id'";
         query($query) or dbwarning("Failed to add forfeit.", $query);
         
         $game_id = mysql_insert_id();
