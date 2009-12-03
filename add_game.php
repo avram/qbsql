@@ -71,19 +71,20 @@
  				"			WHERE game_id='$_GET[modify]' AND player_id='{$_POST[team2_pid][$i]}' LIMIT 1";
  	}
  	if($round_valid && $players_valid) {
- 		//print "<pre>$round_query\n";
- 		query($round_query) or die(mysql_error());
+ 		query($round_query)
+ 			or dberror("Error updating game data.", $round_query);
  		for($k=0; $k < $_POST["team1_size"]; $k++) {
- 			//print "$player1_query[$k]\n";
- 			query($player1_query[$k]) or die(mysql_error());
+ 			query($player1_query[$k])
+ 				or dberror("Error updating player data.",$player1_query[$k]);
  		}
   		for($l=0; $l < $_POST["team2_size"]; $l++) {
- 			//print "$player2_query[$l]\n";
- 			query($player2_query[$l]) or die(mysql_error());
+ 			query($player2_query[$l])
+ 				or dberror("Error updating player data.",$player2_query[$l]);
   		}
-  		//print "</pre>";	
+  		// Check entered data and warn of issues
+  		verify_game($_GET["modify"]);
  	} else {
- 		print "Invalid inputs";
+ 		warning("Invalid inputs");
  	}
  }
  /* This is the normal new game logic */
@@ -267,6 +268,8 @@
          query($play_query) or dbwarning("Choked adding team 2 records",$play_query);
      } 
      message("The round was added successfully.");
+     // Check entered data and warn of issues
+  	 verify_game($game_id);
  	}
  } else if(isset($_GET["edit"]) && is_numeric($_GET["edit"])) {
  	// now we edit the requested game
