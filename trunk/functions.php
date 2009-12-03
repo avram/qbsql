@@ -303,6 +303,95 @@ function fetch_brackets() {
     return $brks;
 }
 
+/* Verify game 
+ * This function pulls a game from the database and verifies that it passes
+ * sanity checks. These might include a common divisor of all valid scores,
+ * non-negative quantities of tossups, powers, etc. */
+function verify_game($id) {
+	global $mysql_prefix;
+	
+	$gcd = 5;
+	$messages = array(	"Score 1 GCD",
+						"Score 2 GCD",
+						"Bonus 1 GCD",
+						"Bonus 2 GCD",
+						"Round TUH",
+						"Forfeit",
+						"Tiebreakers",
+						"Tiebreakers < TUH",
+						"Tossups converted < TUH",
+						"Team 1 tups valid",
+						"Team 1 pows valid",
+						"Team 1 negs valid",
+						"Team 1 tossups < TUH",
+						"Team 2 tups valid",
+						"Team 2 pows valid",
+						"Team 2 negs valid",
+						"Team 2 tossups < TUH"
+	);
+	// Do all the checking in SQL
+	$query = "SELECT	forfeit = r.team1 || forfeit = r.team2,
+						(r.score1 % $gcd) = 0,
+						(r.score2 % $gcd) = 0,
+						((r.score1 - (p1.tup * 10 + p1.pow * 15 - p1.neg * 5)) % $gcd) = 0,
+						((r.score2 - (p2.tup * 10 + p2.pow * 15 - p2.neg * 5)) % $gcd) = 0,
+						r.tu_heard >= 0,
+						ISNULL(forfeit) || r.forfeit = r.team1 || r.forfeit = r.team2,
+						ISNULL(r.tiebreakers) || r.tiebreakers >= 0,
+						ISNULL(r.tiebreakers) || r.tiebreakers <= r.tu_heard,
+						p1.tup + p1.pow + p2.tup + p2.pow <= r.tu_heard,
+						p1.tupv = 0,
+						p1.powv = 0,
+						p1.negv = 0,
+						p1.ct = 0,
+						p2.tupv = 0,
+						p2.powv = 0,
+						p2.negv = 0,
+						p2.ct = 0
+				FROM {$mysql_prefix}_rounds AS r,
+					(SELECT	SUM(tossups) AS tup,
+							SUM(powers) AS pow,
+							SUM(negs) AS neg,
+							SUM(tossups < 0) AS tupv,
+							SUM(powers < 0) AS powv,
+							SUM(negs < 0) AS negv,
+							SUM(tu_heard < tossups + powers + negs) AS ct,
+							team_id AS id
+						FROM {$mysql_prefix}_rounds_players
+						WHERE game_id = '$id' GROUP BY team_id
+					) AS p1,
+					(SELECT	SUM(tossups) AS tup,
+							SUM(powers) AS pow,
+							SUM(negs) AS neg,
+							SUM(tossups < 0) AS tupv,
+							SUM(powers < 0) AS powv,
+							SUM(negs < 0) AS negv,
+							SUM(tu_heard < tossups + powers + negs) AS ct,
+							team_id AS id
+						FROM {$mysql_prefix}_rounds_players
+						WHERE game_id = '$id' GROUP BY team_id
+					) AS p2
+				WHERE 	game_id = '$id'
+					AND	p1.id = r.team1
+					AND p2.id = r.team2";
+	$res = query($query) or dbwarning("Validation query failed.", $query);
+	
+	// mask with desired checks
+	$apply = array(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1);
+	
+	$line = fetch_row($res);
+	
+	// If forfeit, no further checking.
+	if($line[0] == 1) 
+		return;
+	
+	for ($i=1;$i<count($line);$i++) {
+		if($apply[$i] == 1 && $line[$i] != 1) {
+			warning("Data integrity check failed: ".$messages[$i]);
+		}
+	}
+}
+	
 /* Exporting functions */
 /* Returns the queries to create tables for a given tournament */
 /* Result is an array of queries */

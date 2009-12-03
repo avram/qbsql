@@ -55,6 +55,7 @@
 
 if($auth) {
     print "<p><a href='add_game.php?edit=$id&t=$mysql_prefix'>Edit Round</a></p>";
+    verify_game($id);
 }
 
 // set up styles for winner and loser
