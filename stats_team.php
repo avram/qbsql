@@ -55,11 +55,11 @@ $js_includes = true;
      $res1 = query("SELECT {$mysql_prefix}_rounds.id,
 			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
 			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND forfeit!={$mysql_prefix}_tut1.team_id),
+			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),
 			         	{$mysql_prefix}_tut1.team_id,
 			            {$mysql_prefix}_tut2.team_id), '\">', 
 			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND forfeit != {$mysql_prefix}_tut1.team_id),
+			         		AND (ISNULL(forfeit) OR forfeit != {$mysql_prefix}_tut1.team_id)),
 			         	t1.full_name,
 			         	t2.full_name),
 			     '</a>') AS name1,
