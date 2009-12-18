@@ -76,7 +76,7 @@
  <p class="instructions">The bracket field, if specified, should
      be an integer. If no brackets are specified, then results will not be
      broken down by bracket.</p>
- <p>Bracket: <input type="text" name="t_brk" size="5" value="<?=$brk?>" /> (leave blank if no bracket)</p>
+ <p>Bracket: <input type="text" name="t_brk" size="5" value="<?=$brk?>" /> (set to 0 (zero) if no bracket)</p>
  <p><input type="submit" value="Apply Changes" /></p>
  </form>
  <?php
