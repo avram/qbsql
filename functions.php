@@ -420,6 +420,7 @@ CREATE TABLE {$prefix}_rounds (
   tiebreakers int(20) default NULL,
   id int(20) NOT NULL default '0',
   game_id int(20) NOT NULL auto_increment,
+  forfeit int(20) default NULL,
   PRIMARY KEY  (game_id),
   KEY id (id)
 ) ENGINE=MyISAM;
@@ -612,6 +613,165 @@ function sqbs_export_tourney($prefix) {
     }
 
     return $sqbs;
+}
+
+/* Importer that should be able to read a tournament into the system and treat it
+ * like any other QBSQL tournament
+ *
+ * Our approach here will be just like the SQBS exportert, just reversed; we'll
+ * work naively line-by-line and see if it works.
+ * 
+ * Takes a path to the file as input.
+ * Existing tournament must be specified-- the tournament should be
+ * 	empty.
+ **/
+function sqbs_import_tourney($file, $mysql_prefix) {
+	// Load the tournament
+	$query = "SELECT id FROM tournaments WHERE prefix = '$mysql_prefix' LIMIT 1";
+	$res = query($query) or dbwarning("Import error; prefix not found.",$query);
+	if(!$res) return;
+	
+	// Load the file
+	$in = file($file) or error("Failed to open SQBS file.");
+	if(!$in) return;
+	
+	// Remove trailing newlines
+	$in = array_map("trim", $in);
+	
+	// Now we will go line-by-line and create a tourney.
+	// The first section is general data on rosters and teams.
+	$tmct = array_shift($in); // # of teams
+	
+	/* As in the exporter, we match SQL indexes and SQBS ids */
+	$tm_index_to_id = array();
+    $p_index_to_id = array();
+	
+	for($i=0; $i < $tmct; $i++) {
+		$player_ct = array_shift($in); // # players team 1
+		$tm_name = array_shift($in); // Team 1 name
+		$query = "INSERT INTO {$mysql_prefix}_teams SET full_name='$tm_name',
+					short_name='$tm_name'";
+		query($query) or dberror("Team $i addition failed.",$query);
+		$tm_index_to_id[$i] = mysql_insert_id();
+		$p_index_to_id[$i] = array();
+		
+		for($j=0; $j < ($player_ct-1); $j++) {
+			// List of players on team 1
+			$player_name = array_shift($in); // Player name
+			//print_r($in);
+			$pcs = explode(" ", $player_name);
+			$ln = array_pop($pcs);
+			$fn = implode(" ", $pcs);
+			$query = "INSERT INTO {$mysql_prefix}_players SET
+							first_name = '$fn',
+							last_name = '$ln',
+							team = {$tm_index_to_id[$i]}";
+			query($query) or dberror("Player $j (team $i) addition failed.",$query);
+			$p_index_to_id[$i][$j] = mysql_insert_id();
+		}
+	}
+		
+	// Now game data
+	$g_ct = array_shift($in);	// # of games
+	
+	for($i=0; $i<$g_ct; $i++) {
+		$gid = array_shift($in);	// { game unique ID
+		$t1 = array_shift($in);		// { team1 index
+		$t1id = $tm_index_to_id[$t1];
+		$t2 = array_shift($in);		// { team2 index
+		$t2id = $tm_index_to_id[$t2];
+		$score1 = array_shift($in);	// team1 score
+		$score2 = array_shift($in);	// team2 score
+		$tuh = array_shift($in);	// TUH, inc. tiebreakers
+		$round = array_shift($in);	// Round number
+		$bons1 = array_shift($in);	// Bonus count 1
+		$bons2 = array_shift($in);	// Bonus count 2
+		$bon_pts1 = array_shift($in); // Bonus pts 1
+		$bon_pts2 = array_shift($in); // Bonus pts 2
+		$ot = array_shift($in); 	// overtime (1=yes, 0=no) TODO
+		$ot_tup1 = array_shift($in); 	// overtime tossups 1 TODO
+		$ot_tup2 = array_shift($in); 	// overtime tossups 2 TODO
+		$forfeit = array_shift($in); 	// forfeit (1=team1 forfeit, 0=no)
+		/* The next two values are unlikely to be supported by QBSQL */
+        $light1 = array_shift($in);         // lightning t1 pts
+        $light2 = array_shift($in);         // lightning t2 pts
+		
+        $forfeit = ($forfeit == 1) ? "forfeit = '$t1id'" : "forfeit = NULL";
+        
+        $query = "INSERT INTO {$mysql_prefix}_rounds SET
+        			team1 = '$t1id',
+        			team2 = '$t2id',
+        			score1 = '$score1',
+        			score2 = '$score2',
+        			tu_heard = '$tuh',
+        			$forfeit,
+        			id = '$round'";
+        query($query) or dberror("Error adding round $i",$query);
+        
+        $game_id = mysql_insert_id();
+        
+        for($j=0; $j <= 7; $j++) {
+        	$index = array_shift($in);
+        	if(array_key_exists($index, $p_index_to_id[$t1])) {
+        		$pid = $p_index_to_id[$t1][$index];
+        		$fract = array_shift($in);
+        		$ptuh = $fract * $tuh;
+        		$pows = array_shift($in);
+        		$tups = array_shift($in);
+        		$negs = array_shift($in);
+        		array_shift($in); // Unused line
+        		$tuppts = array_shift($in);
+        		$query = "INSERT INTO {$mysql_prefix}_rounds_players SET
+        					player_id = '$pid',
+        					team_id = '$t1id',
+        					powers = '$pows',
+        					tossups = '$tups',
+        					negs = '$negs',
+        					tu_heard = '$ptuh',
+        					round_id = '$round',
+        					game_id = '$game_id'";
+        		query($query) or dberror("Error adding player stats for player $index on team $t1", $query);
+        	} else {
+        		array_shift($in);
+        		array_shift($in);
+              	array_shift($in);
+        	    array_shift($in);
+        	    array_shift($in);
+        	    array_shift($in);
+        	}
+        	$index = array_shift($in);
+        	if(array_key_exists($index, $p_index_to_id[$t2])) {
+        		$pid = $p_index_to_id[$t2][$index];
+        		$fract = array_shift($in);
+        		$ptuh = $fract * $tuh;
+        		$pows = array_shift($in);
+        		$tups = array_shift($in);
+        		$negs = array_shift($in);
+        		array_shift($in); // Unused line
+        		$tuppts = array_shift($in);
+        		$query = "INSERT INTO {$mysql_prefix}_rounds_players SET
+        					player_id = '$pid',
+        					team_id = '$t2id',
+        					powers = '$pows',
+        					tossups = '$tups',
+        					negs = '$negs',
+        					tu_heard = '$ptuh',
+        					round_id = '$round',
+        					game_id = '$game_id'";
+        		query($query) or dberror("Error adding player stats for player $index on team $t1", $query);
+        	} else {
+        		array_shift($in);
+        		array_shift($in);
+              	array_shift($in);
+        	    array_shift($in);
+        	    array_shift($in);
+        	    array_shift($in);
+        	}
+        }
+        /* The SQBS data file has more here, but we don't need it to work with the
+         * NAQT results database, or for our own use.
+         */
+    }
 }
 
 ?>
