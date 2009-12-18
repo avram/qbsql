@@ -52,6 +52,9 @@
      }
 
      message("Tournament updated.");
+ } else if($_GET["a"]=="import") {
+	sqbs_import_tourney($_FILES["sqbs"]["tmp_name"], $mysql_prefix);
+	message("Tournament loaded from SQBS.");
  }
 ?>
 <h2>Settings</h2>
@@ -63,6 +66,16 @@
 </form>
 <h2>Export</h2>
 <p><a href="export.php?t=<?=$mysql_prefix?>">Export Tournament to SQBS</a> - Save the generated file and open it with SQBS. It might work. At the very least, it can be submitted to NAQT.</p>
+<h2>Import</h2>
+<p>Be careful with the importer. It may not work with all SQBS files,
+but it will try. It certainly should work with SQBS files generated
+by QBSQL. Also, you should only use the importer with an empty
+tournament-- results are unpredictable if you already have data in this
+tournament.</p>
+<form action="?a=import&t=<?php print $mysql_prefix ?>" method="post" enctype="multipart/form-data">
+<input type="file" name="sqbs" />
+<input type="submit" value="Upload SQBS file" />
+</form>
 <?php
 
  require "foot.php";			// finish off page
