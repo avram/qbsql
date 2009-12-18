@@ -491,7 +491,7 @@ function export_database() {
  * data file format, and tested against the NAQT results importer. The file
  * created by the exporter has not been tested against SQBS itself, and
  * probably cannot be read by SQBS. It does, however, work with the NAQT
- * importer.
+ * importer and QBSQL's own importer.
  * 
  * The SQBS data format is a series of newline-separated fields.
  */
@@ -629,11 +629,11 @@ function sqbs_import_tourney($file, $mysql_prefix) {
 	// Load the tournament
 	$query = "SELECT id FROM tournaments WHERE prefix = '$mysql_prefix' LIMIT 1";
 	$res = query($query) or dbwarning("Import error; prefix not found.",$query);
-	if(!$res) return;
+	if(!$res) return -1;
 	
 	// Load the file
 	$in = file($file) or error("Failed to open SQBS file.");
-	if(!$in) return;
+	if(!$in) return -1;
 	
 	// Remove trailing newlines
 	$in = array_map("trim", $in);

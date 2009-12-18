@@ -42,7 +42,10 @@
              	dbwarning("A database error occurred while adding the tournament.",
              			  $query);
          }
-         
+         // If we have SQBS data, import it now
+         if(isset($_FILES['sqbs'])) {
+         	sqbs_import_tourney($_FILES['sqbs'], $prefix);
+         }
             // redirect to tournament list
             print <<<RED
 <html><head>
@@ -58,7 +61,7 @@ RED;
 
 
 ?>
-     <form id="newtourney" action="?action=add" method="POST">
+     <form id="newtourney" action="?action=add" method="post" enctype="multipart/form-data">
      <fieldset id="basic">
      <legend>Tournament Settings</legend>
      <ol>
@@ -72,24 +75,26 @@ RED;
       <li><label for="len">Default game length: </label>
       <input type="text" size="4" name="len" value="20" tabindex="4" id="len" />
       <p>tossups per round</p></li>
+      <li><label for="sqbs">Import data from SQBS file: </label>
+      <input type="file" name="sqbs" tabindex="5" /> (optional)</li>
       <li><label for="un">Tournament username: </label>
-      <input type="text" size="30" name="un" tabindex="5" id="un" /></li>
+      <input type="text" size="30" name="un" tabindex="6" id="un" /></li>
       <li><label for="pw">Tournament password: </label>
-      <input type="password" size="30" name="pw" tabindex="6" id="pw" /></li>
+      <input type="password" size="30" name="pw" tabindex="7" id="pw" /></li>
       <li><label for="pw2">Confirm password: </label>
-      <input type="password" size="30" name="pw2" tabindex="7" id="pw2" /></li>
+      <input type="password" size="30" name="pw2" tabindex="8" id="pw2" /></li>
       </ol>
       </fieldset>
       <fieldset id="authentication">
       <legend>Authentication</legend>
       <ol>
       <li><label for="master_un">Master username: </label>
-      <input type="text" size="30" name="master_un" id="master_un" /></li>
+      <input type="text" size="30" name="master_un" id="master_un" tabindex="9" /></li>
       <li><label for="master_pw">Master password: </label>
-      <input type="password" size="30" name="master_pw" id="master_pw" /></li>
+      <input type="password" size="30" name="master_pw" id="master_pw" tabindex="10" /></li>
       </ol>
       </fieldset>
-      <p><input type="submit" class="wymupdate" value="Add tournament" /></p>
+      <p><input type="submit" class="wymupdate" value="Add tournament" tabindex="11" /></p>
      </form>
 <?php
 ?>

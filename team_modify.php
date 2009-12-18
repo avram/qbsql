@@ -25,7 +25,7 @@
  	              WHERE t.id='$tid'
  	              GROUP BY t.id
  	              LIMIT 1";
-    $r_res = query($round_query) or die(mysql_error());
+    $r_res = query($round_query) or dberror("Error fetching rounds during delete.",$round_query);
     list($team, $rnd_ct) = fetch_row($r_res);
     
     $player_query = "SELECT COUNT(p.id)
@@ -33,7 +33,7 @@
                         {$mysql_prefix}_players AS p
                         WHERE t.id='$tid'
                         AND p.team=t.id";
-    $p_res = query($player_query) or die(mysql_error());
+    $p_res = query($player_query) or dberror("Error fetching players during delete.",$player_query);
     list($p_ct) = fetch_row($p_res);
     
     if($rnd_ct > 0 || $p_ct > 0) { // We refuse to delete if there are records that would be orphaned.
@@ -139,7 +139,6 @@
       <input type="text" size="4" name="bracket[]" /><br />
       <input type="submit" value="Add teams" />
      </p>
-    <p>To place teams in brackets, edit them individually and set the bracket numbers.</p>
 <?php
  }
 
