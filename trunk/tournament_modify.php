@@ -44,7 +44,7 @@
          }
          // If we have SQBS data, import it now
          if(isset($_FILES['sqbs'])) {
-         	sqbs_import_tourney($_FILES['sqbs'], $prefix);
+         	sqbs_import_tourney($_FILES['sqbs']["tmp_name"], $prefix);
          }
             // redirect to tournament list
             print <<<RED
