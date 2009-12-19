@@ -632,7 +632,7 @@ function sqbs_import_tourney($file, $mysql_prefix) {
 	if(!$res) return -1;
 	
 	// Load the file
-	$in = file($file) or error("Failed to open SQBS file.");
+	$in = file($file) or warning("Failed to open SQBS file.");
 	if(!$in) return -1;
 	
 	// Remove trailing newlines
