@@ -16,6 +16,16 @@
 
 
  /* Process settings changes */
+ if($_GET["a"] == "lock" && $_POST["confirm"] == "lock") {
+ 	$query = sprintf("UPDATE tournaments SET locked = 1
+ 						WHERE prefix = '%s' LIMIT 1",
+ 			$_GET["t"]);
+ 	query($query) or dbwarning("Failed to lock tournament.",$query);
+ 	message("If no warning appeared, the tournament has been locked.");
+ 	$auth=false;
+ 	require "foot.php";
+ 	die();
+ }
  if($_GET["a"] == "edit" && isset($_POST["name"]) && $_POST["name"] != "") {
      $q = sprintf("UPDATE tournaments SET name='%s',
          description='%s', game_length='%s' WHERE prefix='%s'",
@@ -78,6 +88,15 @@ tournament.</p>
 <form action="?a=import&t=<?=$mysql_prefix?>" method="post" enctype="multipart/form-data">
 <input type="file" name="sqbs" />
 <input type="submit" value="Upload SQBS file" />
+</form>
+<h2>Lock Tournament</h2>
+<p>When you a tournament is complete, you can choose to lock it. Once a tournament
+has been locked, you can no longer make any changes to it. It can only be unlocked
+by the site administrator. When a tournament has passed, it should eventually be
+locked, but not before corrections and such have been made.</p>
+<form action="?a=lock&t=<?=$mysql_prefix?>" method="POST">
+<label for="confirm">Permanently lock this tournament?</label> <input type="checkbox" name="confirm" value="lock" />
+<input type="submit" value="Lock tournament" />
 </form>
 <?php
 
