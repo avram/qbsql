@@ -13,7 +13,9 @@ require "head.php";			// Generate header as appropriate
 ?>
     <p id="description"><?=$tourney_desc?></p>
 <div id="login">
-<? if(!$auth) { ?>
+<?php if($tourney_lock) { ?>
+<h3>Tournament locked</h3>
+<? } else if(!$auth) { ?>
 <form method="post" action="?login&t=<?=$mysql_prefix?>">
  <h3>Login</h3>
  <p>Username: <input type="text" name="login_u" size="10" /> Password: <input type="password" name="login_p" size="10" /> <input type="submit" value="Log in" /></p>

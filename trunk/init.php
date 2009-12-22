@@ -51,8 +51,10 @@
 	    $auth = TRUE;
 	}
     }
-
-
+    
+    // No auth if locked.
+    if($tourney_lock) $auth = false;
+    
     // initialize session and register, set variables
     $_SESSION["auth_{$mysql_prefix}"]=$auth;
 ?>
