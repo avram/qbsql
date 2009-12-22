@@ -25,7 +25,10 @@ $js_includes = true;
 			    IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
 			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),score1,score2) AS winscore,
 			    FORMAT(IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),(score1-{$mysql_prefix}_tut1.tup)/{$mysql_prefix}_tut1.tuc,(score2-{$mysql_prefix}_tut2.tup)/{$mysql_prefix}_tut2.tuc),2) AS winconv,
+			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),
+			         		(score1-{$mysql_prefix}_tut1.tup)/({$mysql_prefix}_tut1.tuc - {$mysql_prefix}_rounds.ot_tossups1),
+			         		(score2-{$mysql_prefix}_tut2.tup)/({$mysql_prefix}_tut2.tuc - {$mysql_prefix}_rounds.ot_tossups1)),2)
+			         	AS winconv,
 			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
 			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
 			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),{$mysql_prefix}_tut2.team_id,
@@ -36,7 +39,10 @@ $js_includes = true;
 			    IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
 			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),score2,score1) AS losescore,
 			    FORMAT(IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),(score2-{$mysql_prefix}_tut2.tup)/{$mysql_prefix}_tut2.tuc,(score1-{$mysql_prefix}_tut1.tup)/{$mysql_prefix}_tut1.tuc),2) AS loseconv,
+			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),
+			         		(score2-{$mysql_prefix}_tut2.tup)/({$mysql_prefix}_tut2.tuc - {$mysql_prefix}_rounds.ot_tossups2),
+			         		(score1-{$mysql_prefix}_tut1.tup)/({$mysql_prefix}_tut1.tuc - {$mysql_prefix}_rounds.ot_tossups1)),2)
+			         	AS loseconv,
 			    ABS(score1-score2) $detail $edit_query
 			FROM
                         (
@@ -68,25 +74,29 @@ $js_includes = true;
      free_result($res1);
 
 print "<h2>Round Report</h2>\n";
-      $res1=query("
-SELECT
-rnds.id,
-rnds.pts/rnds.tuhct*10,
-tut.tup/rnds.tuhct,
-(rnds.pts-tut.tup)/tut.tuc as bpts
-                            FROM
-                            (SELECT SUM(powers*15+tossups*10+negs*(-5)) as tup,
+	 $query = "SELECT
+				rnds.id,
+				rnds.pts/rnds.tuhct*10,
+				tut.tup/rnds.tuhct,
+				(rnds.pts-tut.tup)/(tut.tuc-rnds.ot_tups) as bpts
+                FROM
+                  (SELECT SUM(powers*15+tossups*10+negs*(-5)) as tup,
                     SUM(powers+tossups) as tuc,
                     SUM(powers) as pow,
                     SUM(negs) AS neg,
                     SUM(tossups) as tups,
                     round_id
                     FROM {$mysql_prefix}_rounds_players
-                                GROUP BY {$mysql_prefix}_rounds_players.round_id) AS tut,
-(SELECT rnd.id, SUM(rnd.score1+rnd.score2) as pts,
-SUM(rnd.tu_heard) AS tuhct, COUNT(*)*2 AS teams
-FROM {$mysql_prefix}_rounds AS rnd GROUP BY rnd.id) AS rnds
-				WHERE rnds.id=tut.round_id") or die(mysql_error());
+                        GROUP BY {$mysql_prefix}_rounds_players.round_id) AS tut,
+				  (SELECT rnd.id,
+				  	SUM(rnd.score1+rnd.score2) as pts,
+					SUM(rnd.tu_heard) AS tuhct,
+					SUM(rnd.ot_tossups1+rnd.ot_tossups2) AS ot_tups,
+					COUNT(*)*2 AS teams
+					FROM {$mysql_prefix}_rounds AS rnd
+						GROUP BY rnd.id) AS rnds
+				WHERE rnds.id=tut.round_id ORDER BY rnds.id";
+     $res1=query($query) or dberror("Error running round report.",$query);
      table($res1,array("Round","PP20TUH/Team","TUPts/TUH","Bconv"),4,TRUE,FALSE,"stats",array("sort"));
  
  require "foot.php";			// finish off page

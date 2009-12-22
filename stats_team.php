@@ -52,7 +52,7 @@ $js_includes = true;
      $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";
  $detail = ", CONCAT(\"<a href='game_detail.php?game=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Detail</a>\")";
  
-     $res1 = query("SELECT {$mysql_prefix}_rounds.id,
+     $query="SELECT {$mysql_prefix}_rounds.id,
 			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
 			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
 			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),
@@ -64,19 +64,25 @@ $js_includes = true;
 			         	t2.full_name),
 			     '</a>') AS name1,
 			    IF(score1>=score2,score1,score2) AS winscore,
-			    FORMAT(IF(score1>=score2,(score1-{$mysql_prefix}_tut1.tup)/{$mysql_prefix}_tut1.tuc,(score2-{$mysql_prefix}_tut2.tup)/{$mysql_prefix}_tut2.tuc),2) AS winconv,
+			    FORMAT(IF(score1>=score2,
+			    	(score1-{$mysql_prefix}_tut1.tup)/({$mysql_prefix}_tut1.tuc - {$mysql_prefix}_rounds.ot_tossups1),
+			    	(score2-{$mysql_prefix}_tut2.tup)/({$mysql_prefix}_tut2.tuc - {$mysql_prefix}_rounds.ot_tossups2)),2)
+			    	AS winconv,
 			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
 			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND forfeit!={$mysql_prefix}_tut1.team_id),
+			         		AND (ISNULL(forfeit) OR forfeit !={$mysql_prefix}_tut1.team_id)),
 			         	{$mysql_prefix}_tut2.team_id,
 			            {$mysql_prefix}_tut1.team_id), '\">', 
 			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND forfeit != {$mysql_prefix}_tut1.team_id),
+			         		AND (ISNULL(forfeit) OR forfeit != {$mysql_prefix}_tut1.team_id)),
 			         	t2.full_name,
 			         	t1.full_name),
 			     '</a>') AS name2,
 			    IF(score1>=score2,score2,score1) AS losescore,
-			    FORMAT(IF(score1>=score2,(score2-{$mysql_prefix}_tut2.tup)/{$mysql_prefix}_tut2.tuc,(score1-{$mysql_prefix}_tut1.tup)/{$mysql_prefix}_tut1.tuc),2) AS loseconv,
+			    FORMAT(IF(score1>=score2,
+			    	(score2-{$mysql_prefix}_tut2.tup)/({$mysql_prefix}_tut2.tuc - {$mysql_prefix}_rounds.ot_tossups2),
+			    	(score1-{$mysql_prefix}_tut1.tup)/({$mysql_prefix}_tut1.tuc - {$mysql_prefix}_rounds.ot_tossups1)),2)
+			    	AS loseconv,
 			    ABS(score1-score2) $detail $edit_query
 			FROM
                         (
@@ -104,7 +110,9 @@ $js_includes = true;
 			    AND {$mysql_prefix}_tut2.round_id={$mysql_prefix}_rounds.id
                             AND {$mysql_prefix}_tut2.team_id=t2.id
                             AND (t1.id=$teamid OR t2.id=$teamid)
-			ORDER BY {$mysql_prefix}_rounds.id ASC") or die(mysql_error());
+			ORDER BY {$mysql_prefix}_rounds.id ASC";
+	 //print "<pre>$query</pre>";
+	 $res1= query($query) or dberror("Error on team detail",$query);
      table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array("sort"=>""));
      free_result($res1);
  }
@@ -124,7 +132,7 @@ $js_includes = true;
 
         sort($brackets);
 
-        $table = new StatsTable(array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","15","10","-5","TUH","BConv"),TRUE,TRUE,"stats");
+        $table = new StatsTable(array("Team","W","L","D","Pct.","PPG","OPPG","PPTUH","OPPTUH","P/N","15","10","-5","TUH","BConv","SOS OTPPTUH"),TRUE,TRUE,"stats");
 
         foreach($brackets as $bracket) {
             if($bracket != 0) {
@@ -135,8 +143,58 @@ $js_includes = true;
             $table->names();
             
             $brk_q = " AND {$mysql_prefix}_teams.bracket = '$bracket' ";
-
-            $res1=query("SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
+			
+            /* Average SOS
+             * This should be expanded to use all the various statistics...
+             */
+            $query = "SELECT FORMAT(AVG(sos_oppth.unnorm / (wins+losses+draws)),3)
+            			FROM 
+                            (SELECT 
+			    {$mysql_prefix}_teams.id as id,
+			    SUM(IF((team1={$mysql_prefix}_teams.id AND score1>score2) OR (team2={$mysql_prefix}_teams.id AND score2>score1),1,0)) AS wins,
+			    SUM(IF((team1={$mysql_prefix}_teams.id AND score1<score2) OR (team2={$mysql_prefix}_teams.id AND score2<score1),1,0)) AS losses,
+			    SUM(IF((team1={$mysql_prefix}_teams.id OR team2={$mysql_prefix}_teams.id) AND score1=score2,1,0)) AS draws,
+			    SUM(IF(team1={$mysql_prefix}_teams.id,score1,IF(team2={$mysql_prefix}_teams.id,score2,0))) AS pts,
+			    SUM(IF(team1={$mysql_prefix}_teams.id,score2,IF(team2={$mysql_prefix}_teams.id,score1,0))) AS opts,
+			    SUM(IF(team1={$mysql_prefix}_teams.id,ot_tossups1,IF(team2={$mysql_prefix}_teams.id,ot_tossups2,0))) AS ot_tups,
+			    SUM(IF(team1={$mysql_prefix}_teams.id OR team2={$mysql_prefix}_teams.id,{$mysql_prefix}_rounds.tu_heard,0)) AS tuh,
+			    SUM(IF((team1={$mysql_prefix}_teams.id AND team2 = forfeit)
+			    		OR (team2={$mysql_prefix}_teams.id AND team1 = forfeit),1,0)) AS forfeitwins,
+			    SUM(IF({$mysql_prefix}_teams.id = forfeit,1,0)) AS forfeitlosses
+				FROM {$mysql_prefix}_rounds,{$mysql_prefix}_teams
+				GROUP BY {$mysql_prefix}_teams.id)
+						AS {$mysql_prefix}_statt,
+				{$mysql_prefix}_teams
+                LEFT JOIN (SELECT (rp.powers*15+rp.tossups*10-rp.negs*5) / r.tu_heard * matches.ct
+                					AS unnorm,
+                			t.id AS id
+                		FROM {$mysql_prefix}_teams AS t,
+                			{$mysql_prefix}_rounds AS r,
+                			(SELECT t1.id AS tm1, t2.id AS tm2, COUNT(*) AS ct
+                				FROM {$mysql_prefix}_rounds AS r,
+                					{$mysql_prefix}_teams AS t1,
+                					{$mysql_prefix}_teams AS t2
+                				WHERE ((r.team1 = t1.id
+                					AND r.team2 = t2.id) OR
+                					(r.team1 = t2.id AND r.team2=t1.id))
+                				GROUP BY t1.id, t2.id) AS matches,
+                			(SELECT SUM(powers) AS powers,
+                					SUM(tossups) AS tossups,
+                					SUM(negs) AS negs,
+                					team_id,
+                					game_id
+                				FROM {$mysql_prefix}_rounds_players
+                			GROUP BY game_id) AS rp
+                		WHERE r.game_id = rp.game_id
+            				AND (r.team1 != t.id AND r.team2 != t.id)
+            				AND matches.tm1 = t.id AND matches.tm2 = rp.team_id
+                		GROUP BY t.id) AS sos_oppth
+                	ON sos_oppth.id = {$mysql_prefix}_teams.id
+                	WHERE {$mysql_prefix}_statt.id={$mysql_prefix}_teams.id";
+            $res0 = query($query) or dberror("Error getting SOS avg", $query);
+            list($avg_sos) = fetch_row($res0);
+            
+            $query = "SELECT CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=', {$mysql_prefix}_statt.id, '\">', {$mysql_prefix}_teams.full_name,
                                 '</a>'),
      			wins+forfeitwins,
             	losses+forfeitlosses,
@@ -150,8 +208,9 @@ $js_includes = true;
 			    pow,
 			    tups,
 			    neg,
-                            tuh,
-                            FORMAT((pts-tup)/tuc,2) as bconv
+                tuh,
+                FORMAT((pts-tup)/(tuc-ot_tups),2) as bconv,
+                FORMAT(sos_oppth.unnorm / (wins+losses+draws),2)
                             FROM 
                             (SELECT 
 			    {$mysql_prefix}_teams.id as id,
@@ -160,6 +219,7 @@ $js_includes = true;
 			    SUM(IF((team1={$mysql_prefix}_teams.id OR team2={$mysql_prefix}_teams.id) AND score1=score2,1,0)) AS draws,
 			    SUM(IF(team1={$mysql_prefix}_teams.id,score1,IF(team2={$mysql_prefix}_teams.id,score2,0))) AS pts,
 			    SUM(IF(team1={$mysql_prefix}_teams.id,score2,IF(team2={$mysql_prefix}_teams.id,score1,0))) AS opts,
+			    SUM(IF(team1={$mysql_prefix}_teams.id,ot_tossups1,IF(team2={$mysql_prefix}_teams.id,ot_tossups2,0))) AS ot_tups,
 			    SUM(IF(team1={$mysql_prefix}_teams.id OR team2={$mysql_prefix}_teams.id,{$mysql_prefix}_rounds.tu_heard,0)) AS tuh,
 			    SUM(IF((team1={$mysql_prefix}_teams.id AND team2 = forfeit)
 			    		OR (team2={$mysql_prefix}_teams.id AND team1 = forfeit),1,0)) AS forfeitwins,
@@ -171,13 +231,42 @@ $js_includes = true;
 		    SUM(powers) as pow,
                     SUM(negs) AS neg,
                     SUM(tossups) as tups,
-		    team_id 
+		    team_id
                     FROM {$mysql_prefix}_teams, {$mysql_prefix}_rounds_players
                     WHERE {$mysql_prefix}_teams.id={$mysql_prefix}_rounds_players.team_id GROUP BY team_id) AS {$mysql_prefix}_tut,
-                             {$mysql_prefix}_teams
+                {$mysql_prefix}_teams
+                LEFT JOIN
+                	(SELECT (rp.powers*15+rp.tossups*10-rp.negs*5)/r.tu_heard*matches.ct
+                					AS unnorm,
+                			t.id AS id,
+                			matches.ct AS matchct
+                		FROM {$mysql_prefix}_teams AS t,
+                			{$mysql_prefix}_rounds AS r,
+                			(SELECT t1.id AS tm1, t2.id AS tm2, COUNT(*) AS ct
+                				FROM {$mysql_prefix}_rounds AS r,
+                					{$mysql_prefix}_teams AS t1,
+                					{$mysql_prefix}_teams AS t2
+                				WHERE ((r.team1 = t1.id
+                					AND r.team2 = t2.id) OR
+                					(r.team1 = t2.id AND r.team2=t1.id))
+                				GROUP BY t1.id, t2.id) AS matches,
+                			(SELECT SUM(powers) AS powers,
+                					SUM(tossups) AS tossups,
+                					SUM(negs) AS negs,
+                					team_id,
+                					game_id
+                				FROM {$mysql_prefix}_rounds_players
+                			GROUP BY game_id) AS rp
+                		WHERE r.game_id = rp.game_id
+            				AND (r.team1 != t.id AND r.team2 != t.id)
+            				AND matches.tm1 = t.id AND matches.tm2 = rp.team_id
+                		GROUP BY t.id) AS sos_oppth
+                	ON sos_oppth.id = {$mysql_prefix}_teams.id
 				WHERE {$mysql_prefix}_statt.id={$mysql_prefix}_tut.team_id
                                 AND {$mysql_prefix}_statt.id={$mysql_prefix}_teams.id
-                                $brk_q ORDER BY pct DESC, pptuh DESC") or die(mysql_error());
+                                $brk_q ORDER BY pct DESC, pptuh DESC";
+            //echo "<textarea rows=50 cols=90>$query</textarea>";
+            $res1 = query($query) or dberror("Error fetching team results.",$query);
             $table->body_res($res1);
             free_result($res1);
             
@@ -190,6 +279,7 @@ $js_includes = true;
         }
 
         print $table->table();
+        print "<p>Average SOS: $avg_sos</p>";
  }
  require "foot.php";			// finish off page
 ?>

@@ -131,15 +131,15 @@ div#login {
 }
 
 div#login h3, div#login p {
-display: inline;
+	display: inline;
 }
 
 div#login h3 {
-margin-right: 2em;
+	margin-right: 2em;
 }
 
 div#login * {
-font-size: 75%;
+	font-size: 85%;
 }
 
 /* forms styles */
@@ -188,7 +188,22 @@ font-size: 70%;
 text-align: right;
 }
 
+fieldset p.instructions {
+	font-size: 80%;
+	padding-left: 5px;
+}
 
+fieldset ol {
+	padding: 5px;
+	margin: 5px;
+}
+
+fieldset#overtime {
+	width: 40em;
+	display: block;
+	clear: right;
+	float: none;
+}
 
 /* style thanks to http://robertdenton.org/reference/css-tables-tutorial.html */
 table

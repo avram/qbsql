@@ -25,7 +25,7 @@
              $prefix_ok = false;
      }
      
-     if ($master && $confirm && $prefix_ok && is_numeric($_POST["len"]) && !$name_bad) {
+     if ($master && $confirm && $prefix_ok && is_numeric($_POST["len"])) {
          // We've checked all the input.
          $query = "INSERT INTO tournaments SET name = '$_POST[name]',
                     prefix = '$_POST[prefix]', username = '$_POST[un]',
@@ -55,8 +55,15 @@
 </body></html>
 RED;
      }
-     else
-         warning("An input validation error occurred. Double-check your input and try again, perhaps with a different prefix.");
+     else {
+     	if(!$prefix_ok) {
+     		warning("The specified prefix is invalid or taken.");
+     	} else if(!$master) {
+     		warning("The master username or password is incorrect.");
+     	} else {
+     		warning("An input validation error occurred. Double-check your input and try again, perhaps with a different prefix.");	
+     	}
+     }
  }
 
 

@@ -18,7 +18,11 @@
                         t2.id AS t2_id,
                         rounds.score2 AS t2_score,
                         rounds.id as id,
-                        rounds.forfeit as forfeit
+                        rounds.forfeit as forfeit,
+                        rounds.ot as ot_tuh,
+                        rounds.ot_tossups1 as ot_tu1,
+                        rounds.ot_tossups2 as ot_tu2,
+                        rounds.tu_heard as tuh
                     FROM {$mysql_prefix}_rounds AS rounds,
                         {$mysql_prefix}_teams AS t1,
                         {$mysql_prefix}_teams AS t2
@@ -27,19 +31,19 @@
                         AND t2.id = rounds.team2
                     LIMIT 1");
     if($round = fetch_row($res)) {
-        list($t1, $f1, $id1, $sc1, $t2, $f2, $id2, $sc2, $rid, $forfeit) = $round;
-        $title .= ": $t1 vs. $t2, Round $rid";
+        list($t1, $f1, $id1, $sc1, $t2, $f2, $id2, $sc2,
+        	 $rid, $forfeit, $ot_tuh, $ot_tu1, $ot_tu2, $tuh) = $round;
         // see who won
         if ($sc1 > $sc2 || $forfeit == $id2) {
-            $winner = array($t1, $f1, $id1, $sc1);
-            $loser = array($t2, $f2, $id2, $sc2);
+            $winner = array($t1, $f1, $id1, $sc1, $ot_tu1);
+            $loser = array($t2, $f2, $id2, $sc2, $ot_tu2);
         } elseif ($sc2 > $sc1 || $forfeit == $id1) {
-            $loser = array($t1, $f1, $id1, $sc1);
-            $winner = array($t2, $f2, $id2, $sc2);
+            $loser = array($t1, $f1, $id1, $sc1, $ot_tu1);
+            $winner = array($t2, $f2, $id2, $sc2, $ot_tu2);
         } else {
             $draw = true;
-            $winner = array($t1, $f1, $id1, $sc1);
-            $loser = array($t2, $f2, $id2, $sc2);
+            $winner = array($t1, $f1, $id1, $sc1, $ot_tu1);
+            $loser = array($t2, $f2, $id2, $sc2, $ot_tu2);
         }
     } else {
         $error = "No game found for given game number.";
@@ -53,10 +57,14 @@
     warning($error, "Go to \"Round Summaries\"", "stats_round.php");
  else { // continue
 
+ 	print "<h2>$t1 vs. $t2, Round $rid</h2>\n";
+ 	
 if($auth) {
     print "<p><a href='add_game.php?edit=$id&t=$mysql_prefix'>Edit Round</a></p>";
     verify_game($id);
 }
+
+print "<p id='tuh'>$tuh tossups heard ({$ot_tuh} in overtime)</p>";
 
 // set up styles for winner and loser
 $winstyle = "winner";
@@ -75,17 +83,20 @@ if(!$forfeit){
 $w_query = "SELECT SUM(rp.tossups),
                 SUM(rp.negs),
                 SUM(rp.powers),
-                FORMAT(($winner[3]-SUM(10*rp.tossups+15*rp.powers-5*rp.negs))/SUM(rp.tossups+rp.powers),2),
+                FORMAT(($winner[3]-SUM(10*rp.tossups+15*rp.powers-5*rp.negs))
+                		/(SUM(rp.tossups+rp.powers)-$winner[4]),2),
                 SUM(rp.tu_heard),
                 SUM(10*rp.tossups+15*rp.powers-5*rp.negs),
                 FORMAT(SUM(rp.powers)/SUM(rp.negs),2)
             FROM {$mysql_prefix}_rounds_players AS rp
             WHERE rp.game_id = '$id'
                 AND rp.team_id = '$winner[2]' ";
+
 $l_query = "SELECT SUM(rp.tossups),
                 SUM(rp.negs),
                 SUM(rp.powers),
-                FORMAT(($loser[3]-SUM(10*rp.tossups+15*rp.powers-5*rp.negs))/SUM(rp.tossups+rp.powers),2),
+                FORMAT(($loser[3]-SUM(10*rp.tossups+15*rp.powers-5*rp.negs))
+                		/(SUM(rp.tossups+rp.powers)-$loser[4]),2),
                 SUM(rp.tu_heard),
                 SUM(10*rp.tossups+15*rp.powers-5*rp.negs),
                 FORMAT(SUM(rp.powers)/SUM(rp.negs),2)
@@ -173,8 +184,10 @@ $l_query = "SELECT SUM(rp.tossups),
      </tr>";
 ?>
      <tr class="total">
-        <td colspan="3"></td>
-        <th>BConv</th>
+        <td></td>
+        <th><abbr title="Overtime tossups answered">OT</abbr></th>
+        <td><?=$winner[4]?></td>
+        <th><abbr title="Bonus conversion">BConv</abbr></th>
 	    <td><?=$wbconv?></td>
 	    <th>Points</th>
 	    <td><?=$winner[3]?></td>
@@ -223,8 +236,10 @@ $l_query = "SELECT SUM(rp.tossups),
      </tr>";
 ?>
      <tr class="total">
-        <td colspan="3"></td>
-        <th>BConv</th>
+        <td></td>
+        <th><abbr title="Overtime tossups answered">OT</abbr></th>
+        <td><?=$loser[4]?></td>
+        <th><abbr title="Bonus conversion">BConv</abbr></th>
 	    <td><?=$lbconv?></td>
 	    <th>Points</th>
 	    <td><?=$loser[3]?></td>

@@ -317,17 +317,17 @@ function verify_game($id) {
 						"Bonus 2 GCD",
 						"Round TUH",
 						"Forfeit",
-						"Tiebreakers",
-						"Tiebreakers < TUH",
-						"Tossups converted < TUH",
+						"Overtime tossups valid",
+						"Overtime tossups <= Overtime TUH",
+						"Tossups converted <= TUH",
 						"Team 1 tups valid",
 						"Team 1 pows valid",
 						"Team 1 negs valid",
-						"Team 1 tossups < TUH",
+						"Team 1 tossups <= TUH",
 						"Team 2 tups valid",
 						"Team 2 pows valid",
 						"Team 2 negs valid",
-						"Team 2 tossups < TUH"
+						"Team 2 tossups <= TUH"
 	);
 	// Do all the checking in SQL
 	$query = "SELECT	forfeit = r.team1 || forfeit = r.team2,
@@ -337,8 +337,11 @@ function verify_game($id) {
 						((r.score2 - (p2.tup * 10 + p2.pow * 15 - p2.neg * 5)) % $gcd) = 0,
 						r.tu_heard >= 0,
 						ISNULL(forfeit) || r.forfeit = r.team1 || r.forfeit = r.team2,
-						ISNULL(r.tiebreakers) || r.tiebreakers >= 0,
-						ISNULL(r.tiebreakers) || r.tiebreakers <= r.tu_heard,
+						(ISNULL(r.ot) || r.ot >= 0)
+								&& (ISNULL(r.ot_tossups1) || r.ot_tossups1 >=0)
+								&& (ISNULL(r.ot_tossups2) || r.ot_tossups2 >=0),
+						ISNULL(r.ot) || (ISNULL(r.ot_tossups1) && ISNULL(r.ot_tossups2))
+									 || (r.ot <= r.tu_heard && r.ot >= r.ot_tossups1 + r.ot_tossups2),
 						p1.tup + p1.pow + p2.tup + p2.pow <= r.tu_heard,
 						p1.tupv = 0,
 						p1.powv = 0,
@@ -387,7 +390,7 @@ function verify_game($id) {
 	
 	for ($i=1;$i<count($line);$i++) {
 		if($apply[$i] == 1 && $line[$i] != 1) {
-			warning("Data integrity check failed: ".$messages[$i]);
+			warning("Data integrity check failed: ".$messages[$i-1]);
 		}
 	}
 }
@@ -412,13 +415,15 @@ CREATE;
     $query = <<<CREATE
 CREATE TABLE {$prefix}_rounds (
   name varchar(40) default NULL,
-  team1 int(20) NOT NULL default '0',
-  team2 int(20) NOT NULL default '0',
+  team1 int(20) NOT NULL default 0,
+  team2 int(20) NOT NULL default 0,
   score1 int(20) default NULL,
   score2 int(20) default NULL,
   tu_heard int(20) default NULL,
-  tiebreakers int(20) default NULL,
-  id int(20) NOT NULL default '0',
+  ot_tossups1 int(20) NOT NULL default 0,
+  ot_tossups2 int(20) NOT NULL default 0,
+  ot int(20) NOT NULL default 0,
+  id int(20) NOT NULL default 0,
   game_id int(20) NOT NULL auto_increment,
   forfeit int(20) default NULL,
   PRIMARY KEY  (game_id),
@@ -544,14 +549,15 @@ function sqbs_export_tourney($prefix) {
     // This little beast gets all of the game data.
     $g_res = query("SELECT team1, team2, score1, score2, tu_heard, r.id,
                         t1.bons, t1.tuppts, t2.bons, t2.tuppts, r.game_id,
-                        r.forfeit
+                        r.forfeit, r.ot, r.ot_tossups1, r.ot_tossups2
                     FROM {$prefix}_rounds AS r,
                     (SELECT SUM(tossups+powers) AS bons, SUM(tossups*10+powers*15-negs*5) AS tuppts, game_id, team_id
                         FROM {$prefix}_rounds_players GROUP BY game_id, team_id) AS t1,
                     (SELECT SUM(tossups+powers) AS bons, SUM(tossups*10+powers*15-negs*5) AS tuppts, game_id, team_id
                         FROM {$prefix}_rounds_players GROUP BY game_id, team_id) AS t2
                     WHERE t1.team_id = team1 AND t2.team_id = team2 AND t1.game_id=r.game_id AND t2.game_id=r.game_id ORDER BY r.id") or die(mysql_error());
-    while(list($t1,$t2, $sc1, $sc2, $tuh, $rnd, $bons1, $tuppts1, $bons2, $tuppts2, $game, $forfeit) = fetch_row($g_res)) {
+    while(list($t1,$t2, $sc1, $sc2, $tuh, $rnd, $bons1, $tuppts1, $bons2, $tuppts2,
+    			$game, $forfeit, $ot, $ot_tu1, $ot_tu2) = fetch_row($g_res)) {
         $sqbs .= "$game\n";                     // unique identifier for game
         $sqbs .= $tm_id_to_index[$t1]."\n";     // index of team 1
         $sqbs .= $tm_id_to_index[$t2]."\n";     // index of team 2
@@ -563,11 +569,10 @@ function sqbs_export_tourney($prefix) {
         $sqbs .= ($sc1-$tuppts1)."\n";          // team1 bonus pts
         $sqbs .= "$bons2\n";
         $sqbs .= ($sc2-$tuppts2)."\n";
-        /* The next four values should be maintained by QBSQL, but we don't
-         * yet support them. */
-        $sqbs .= "0\n";                         // overtime (1=yes, 0=no)
-        $sqbs .= "0\n";                         // team1 # correct OT tups
-        $sqbs .= "0\n";                         // team2  --same--
+        $ot = ($ot > 0) ? "1" : "0";
+        $sqbs .= "$ot\n";                         // overtime (1=yes, 0=no)
+        $sqbs .= $ot_tu1."\n";                    // team1 # correct OT tups
+        $sqbs .= $ot_tu2."\n";                   // team2  --same--
         $forfeit = ($forfeit == $t1) ? 1 : 0; 	// FIXME We cannot rely on the first
         										// team always being the forfeiting one.
         $sqbs .= "$forfeit\n";                  // forfeit (1=team1 forfeit, 0=no)
@@ -688,15 +693,19 @@ function sqbs_import_tourney($file, $mysql_prefix) {
 		$bons2 = array_shift($in);	// Bonus count 2
 		$bon_pts1 = array_shift($in); // Bonus pts 1
 		$bon_pts2 = array_shift($in); // Bonus pts 2
-		$ot = array_shift($in); 	// overtime (1=yes, 0=no) TODO
-		$ot_tup1 = array_shift($in); 	// overtime tossups 1 TODO
-		$ot_tup2 = array_shift($in); 	// overtime tossups 2 TODO
+		$ot = array_shift($in); 	// overtime (1=yes, 0=no)
+		$ot_tup1 = array_shift($in); 	// overtime tossups 1
+		$ot_tup2 = array_shift($in); 	// overtime tossups 2
 		$forfeit = array_shift($in); 	// forfeit (1=team1 forfeit, 0=no)
 		/* The next two values are unlikely to be supported by QBSQL */
         $light1 = array_shift($in);         // lightning t1 pts
         $light2 = array_shift($in);         // lightning t2 pts
 		
+        // Set forfeit to be first team
         $forfeit = ($forfeit == 1) ? "forfeit = '$t1id'" : "forfeit = NULL";
+        
+        // Recalculate # of overtime tossups -- we guess here
+        $ot = max(array($ot, $ot_tup1 + $ot_tup2));
         
         $query = "INSERT INTO {$mysql_prefix}_rounds SET
         			team1 = '$t1id',
@@ -705,6 +714,9 @@ function sqbs_import_tourney($file, $mysql_prefix) {
         			score2 = '$score2',
         			tu_heard = '$tuh',
         			$forfeit,
+        			ot = '$ot',
+        			ot_tossups1 = '{$ot_tup1}',
+        			ot_tossups2 = '{$ot_tup2}',
         			id = '$round'";
         query($query) or dberror("Error adding round $i",$query);
         
