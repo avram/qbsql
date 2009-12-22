@@ -2,6 +2,10 @@
 $(document).ready(function() 
     {
         $(".sort").tablesorter({widgets: ['zebra']});
+        $("#overtime-content").hide();
+        $("fieldset#overtime legend").click(function() {
+        	$("#overtime-content").toggle("fast");
+        })
     } 
 );
 

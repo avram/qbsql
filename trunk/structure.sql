@@ -36,6 +36,9 @@ CREATE TABLE {$prefix}_rounds (
   score2 int(20) default NULL,
   tu_heard int(20) default NULL,
   id int(20) NOT NULL default '0',
+  ot_tossups1 int(20) default NULL,
+  ot_tossups2 int(20) default NULL,
+  ot int(20) default '0',
   game_id int(20) NOT NULL auto_increment,
   PRIMARY KEY  (game_id),
   KEY id (id)

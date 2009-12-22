@@ -9,6 +9,7 @@
  require "init.php";			// set up (connect to DB, etc)
  require "require_admin.php";		// not just anyone can use this
  $title="Add game";
+ $js_includes = True;
  require "head.php";			// Generate header as appropriate
 
  
@@ -42,9 +43,11 @@
  	$round_valid = (is_numeric($_POST["team1_score"]) && is_numeric($_POST["team2_score"])
  			&& is_numeric($_POST["total_tuh"]));
  			
- 	$round_query = "UPDATE {$mysql_prefix}_rounds SET score1='$_POST[team1_score]', " .
- 				"	score2='$_POST[team2_score]', tu_heard='$_POST[total_tuh]' " .
- 				"		WHERE game_id='$_GET[modify]' LIMIT 1";
+ 	$round_query = "UPDATE {$mysql_prefix}_rounds SET score1='$_POST[team1_score]',
+ 						score2='$_POST[team2_score]', tu_heard='$_POST[total_tuh]',
+ 						ot='$_POST[ot_tuh]', ot_tossups1='$_POST[ot_tossups1]',
+ 						ot_tossups2='$_POST[ot_tossups2]'
+ 					WHERE game_id='$_GET[modify]' LIMIT 1";
  	$players_valid = TRUE;
  	for($i = 0; $i < $_POST["team1_size"]; $i++) {
  		$players_valid = ($players_valid && is_numeric($_POST["team1_pid"][$i])
@@ -159,6 +162,19 @@
 	 <input type=\"hidden\" name=\"team2_id\" value=\"$team2_id\" />
  	 </p>
 	 <p>Toss-ups heard: <input type=\"text\" size=\"5\" name=\"total_tuh\" value=\"$tourney_game_length\" /></p>
+	 <fieldset id='overtime'>
+	 <legend>Overtime</legend>
+	 <div id='overtime-content'>
+	 <p class='instructions'>Enter the total number of overtime tossups read in the
+	 first field, then the number of overtime tossups answered correctly by each team
+	 in their respective fields.</p>
+	 <ol>
+	  <li><label for='ot_tuh'>Toss-ups heard:</label> <input type='text' size='5' name='ot_tuh' value='0' /></li>
+	  <li><label for='ot_tossups1'>$team1:</label> <input type='text' size='5' name='ot_tossups1' value='0' /></li>
+	  <li><label for='ot_tossups2'>$team2:</label> <input type='text' size='5' name='ot_tossups2' value='0' /></li>
+	 </ol>
+	 </div>
+	 </fieldset>
 	 <h3>Individual scores</h3>
 	 <table>
 	  <thead>
@@ -248,7 +264,9 @@
      $rnd_query="INSERT INTO {$mysql_prefix}_rounds SET team1='$_POST[team1_id]',
                     team2='$_POST[team2_id]', score1='$_POST[team1_score]',
                     score2='$_POST[team2_score]', tu_heard='$_POST[total_tuh]',
-                    id='$_POST[round]'";
+                    id='$_POST[round]', ot='$_POST[ot_tuh]',
+                    ot_tossups1='$_POST[ot_tossups1]',
+                    ot_tossups2='$_POST[ot_tossups2]'";
      query($rnd_query) or dberror("Choked adding round info, probably lost individual stats",$rnd_query);
 
      $game_id = mysql_insert_id(); 	
@@ -277,14 +295,18 @@
  	
  	
  	// get the entry from the rounds table
- 	list($team1_name, $team2_name, $game_name, $team1_id, $team2_id, $team1_score, $team2_score, $tuh, $round_id, $forfeit) =
- 			fetch_row(query("SELECT t1.full_name, t2.full_name, rounds.name, rounds.team1," .
+ 	$query = "SELECT t1.full_name, t2.full_name, rounds.name, rounds.team1," .
  			"rounds.team2, rounds.score1, rounds.score2," .
- 			"rounds.tu_heard, rounds.id, rounds.forfeit" .
+ 			"rounds.tu_heard, rounds.id, rounds.forfeit," .
+ 			"rounds.ot, rounds.ot_tossups1, rounds.ot_tossups2" .
  			"	FROM {$mysql_prefix}_rounds AS rounds, {$mysql_prefix}_teams AS t1, {$mysql_prefix}_teams AS t2 " .
  			"	WHERE rounds.game_id = $game_id AND " .
  			"		rounds.team1=t1.id AND " .
- 			"		rounds.team2=t2.id"));
+ 			"		rounds.team2=t2.id";
+ 	$res = query($query) or dberror("Error fetching round data.",$query);
+ 	list($team1_name, $team2_name, $game_name, $team1_id, $team2_id,
+ 			$team1_score, $team2_score, $tuh, $round_id, $forfeit,
+ 			$ot_tuh, $ot_tossups1, $ot_tossups2) = fetch_row($res);
  	
  	print "<h2>Editing Round $round_id: $team1_name vs. $team2_name</h2>\n";
  	
@@ -307,7 +329,7 @@
  			"	WHERE {$mysql_prefix}_rounds_players.game_id = $game_id" .
  			"		AND {$mysql_prefix}_rounds_players.team_id=$team1_id" .
  			"		AND {$mysql_prefix}_rounds_players.player_id = {$mysql_prefix}_players.id";
- 	$team1_res = query($team1_query) or die(mysql_error());
+ 	$team1_res = query($team1_query) or dberror("Error fetching team 1 data",$team1_query);
 	$team2_query = "SELECT {$mysql_prefix}_rounds_players.player_id, " .
  			"{$mysql_prefix}_rounds_players.team_id, {$mysql_prefix}_rounds_players.powers, " .
  			"{$mysql_prefix}_rounds_players.tossups, {$mysql_prefix}_rounds_players.negs, " .
@@ -317,16 +339,29 @@
  			"	WHERE {$mysql_prefix}_rounds_players.game_id = $game_id" .
  			"		AND {$mysql_prefix}_rounds_players.team_id=$team2_id" .
  			"		AND {$mysql_prefix}_rounds_players.player_id = {$mysql_prefix}_players.id";
- 	$team2_res = query($team2_query) or die(mysql_error());
+ 	$team2_res = query($team2_query) or dberror("Error fetching team 2 data.",$team2_query);
  	
 ?>
-    <form action="?modify=<?=$game_id?>&t=<?=$mysql_prefix?>" method="POST">
+   <form action="?modify=<?=$game_id?>&t=<?=$mysql_prefix?>" method="POST">
    <h3>Points</h3>
    <p><?=$team1_name?>: <input type="text" name="team1_score" size="5" value="<?=$team1_score?>" />
       <?=$team2_name?>: <input type="text" name="team2_score" size="5" value="<?=$team2_score?>" /></p>
    	 <p>Toss-ups heard: <input type="text" size="5" name="total_tuh" value="<?=$tuh?>" />
    	  <input type="hidden" name="game_id" value="<?=$game_id?>" />
    	 </p>
+   	 <fieldset id='overtime'>
+	 <legend>Overtime</legend>
+	 <div id='overtime-content'>
+	 <p class='instructions'>Enter the total number of overtime tossups read in the
+	 first field, then the number of overtime tossups answered correctly by each team
+	 in their respective fields.</p>
+	 <ol>
+	  <li><label for='ot_tuh'>Toss-ups heard:</label> <input type='text' size='5' name='ot_tuh' value='<?=$ot_tuh?>' /></li>
+	  <li><label for='ot_tossups1'><?=$team1_name?>:</label> <input type='text' size='5' name='ot_tossups1' value='<?=$ot_tossups1?>' /></li>
+	  <li><label for='ot_tossups2'><?=$team2_name?>:</label> <input type='text' size='5' name='ot_tossups2' value='<?=$ot_tossups2?>' /></li>
+	 </ol>
+	 </div>
+	 </fieldset>
 	 <h3>Individual scores</h3>
 	 <table>
 	  <thead>
