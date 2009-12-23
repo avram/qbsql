@@ -60,7 +60,7 @@ function migration_apply($migration, $rev_no) {
     if(is_array($migration)) {
         foreach($migration as $key => $migration_part) {
             // If there is a prefix substitution, then apply it
-            if($key = "PFX") {
+            if($key == "PFX") {
                 // First, get all the prefixes.
                 $res = query("SELECT prefix FROM tournaments");
                 // For each prefix, substitute and run the migration
@@ -80,7 +80,7 @@ function migration_apply($migration, $rev_no) {
 }
 
 function migration_error($revno, $error, $errno) {
-	$debug = TRUE;
+	global $debug;
     if ($debug)
         warning("Database upgrade to revision #$revno failed. Check data integrity. [($errno) $error]");
     else
