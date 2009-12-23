@@ -86,6 +86,7 @@
   		}
   		// Check entered data and warn of issues
   		verify_game($_GET["modify"]);
+  		message("Game changes applied.");
  	} else {
  		warning("Invalid inputs");
  	}
