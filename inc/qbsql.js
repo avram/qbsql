@@ -1,3 +1,132 @@
+// Error checking
+
+function errorMsg(msg) {
+	alert(msg);
+}
+
+function checkTUH(arr, teamTUH, teamName) {
+	var tot = 0;
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i].value != "") {
+			if (parseInt(arr[i].value) > teamTUH) {
+				errorMsg ("Player " + (i + 1) + " on team " + teamName + " heard more tossups than were read.");
+				return false;
+			}
+			tot += parseInt(arr[i].value);
+		}
+	}
+	
+	if (tot <= 0) {
+		errorMsg ("No tossups heard for " + teamName + ".");
+		return false;
+	} else if (tot > teamTUH * 4) {
+		errorMsg ("Too many tossups heard for " + teamName + ".");
+		return false;
+	}
+	return true;
+}
+
+function checkTotalAnswered(t1pows, t1tus, t2pows, t2tus, tusHeard) {
+	var tot = 0;
+	for (var i = 0; i < t1pows.length; i++) {
+		if (t1pows[i].value != "") {
+			tot += parseInt(t1pows[i].value);
+		}
+	}
+	for (var i = 0; i < t1tus.length; i++) {
+		if (t1tus[i].value != "") {
+			tot += parseInt(t1tus[i].value);
+		}
+	}
+	for (var i = 0; i < t2pows.length; i++) {
+		if (t2pows[i].value != "") {
+			tot += parseInt(t2pows[i].value);
+		}
+	}
+	for (var i = 0; i < t2tus.length; i++) {
+		if (t2tus[i].value != "") {
+			tot += parseInt(t2tus[i].value);
+		}
+	}
+	
+	if (tot > tusHeard) {
+		errorMsg ("More tossups were answered than read.");
+		return false;
+	}
+	return true;
+}
+
+function checkTotalNegs(t1negs, t2negs, tusHeard) {
+	var tot = 0;
+	for (var i = 0; i < t1negs.length; i++) {
+		if (t1negs[i].value != "") {
+			tot += parseInt(t1negs[i].value);
+		}
+	}
+	for (var i = 0; i < t2negs.length; i++) {
+		if (t2negs[i].value != "") {
+			tot += parseInt(t2negs[i].value);
+		}
+	}
+
+	if (tot > tusHeard) {
+		errorMsg ("More negs than tossups read.");
+		return false;
+	}
+	return true;
+}
+
+function checkScoreDivisor(score, team) {
+	if (score % 5 != 0) {
+		errorMsg("Score for team " + team + " is not a multiple of 5.");
+		return false;
+	}
+	return true;
+}
+
+/*
+Total score % 5 == 0
+
+[ Total individual TUs heard > 0; <= 4 * TUs heard team
+Individual TUs heard <= TUS heard team ]
+
+[ Total TUs answered <= TUs heard team ]
+
+[ Total negs <= TUs heard team ]
+
+Bonus conversion <= 30, >= 0
+
+Individual Buzzes <= individual TUs heard
+
+Team buzzes <= Team TUs heard -- necessary?
+*/
+
+function checkInput(team1, team2) {
+	var t1score = parseInt(document.getElementsByName("team1_score")[0].value);
+	if (!checkScoreDivisor(t1score, team1)) return false;
+	var t2score = parseInt(document.getElementsByName("team2_score")[0].value);
+	if (!checkScoreDivisor(t2score, team2)) return false;		
+	
+	var tusHeard = parseInt(document.getElementsByName("total_tuh")[0].value);
+	var t1tuh = document.getElementsByName("team1_tuh[]");
+	var t2tuh = document.getElementsByName("team2_tuh[]");
+	if (!checkTUH(t1tuh, tusHeard, team1)) return false;
+	if (!checkTUH(t2tuh, tusHeard, team2)) return false;
+	
+	var t1pows = document.getElementsByName("team1_pow[]");
+	var t1tus = document.getElementsByName("team1_tu[]");
+	var t2pows = document.getElementsByName("team2_pow[]");
+	var t2tus = document.getElementsByName("team2_tu[]");
+	if (!checkTotalAnswered(t1pows, t1tus, t2pows, t2tus, tusHeard)) return false;
+	
+	var t1negs = document.getElementsByName("team1_neg[]");
+	var t2negs = document.getElementsByName("team2_neg[]");
+	if (!checkTotalNegs(t1negs, t2negs, tusHeard)) return false;
+	
+	return true;
+}
+
+
 // sorter
 $(document).ready(function() 
     {

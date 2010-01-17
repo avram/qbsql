@@ -154,7 +154,7 @@
      
      echo "
 	 <h2>Round $round, $team1 vs. $team2</h2>
-	 <form action=\"add_game.php?submit=bork&t=$mysql_prefix\" method=\"POST\">
+	 <form onSubmit=\"return checkInput('$team1', '$team2')\" action=\"add_game.php?submit=bork&t=$mysql_prefix\" method=\"POST\">
 	 <h3>Scores</h3>
 	 <p>$team1: <input type=\"text\" size=\"5\" name=\"team1_score\" />
 	 $team2: <input type=\"text\" size=\"5\" name=\"team2_score\" />
@@ -343,7 +343,7 @@
  	$team2_res = query($team2_query) or dberror("Error fetching team 2 data.",$team2_query);
  	
 ?>
-   <form action="?modify=<?=$game_id?>&t=<?=$mysql_prefix?>" method="POST">
+   <form onSubmit="return checkInput('<?=$team1_name?>', '<?=$team2_name?>')" action="?modify=<?=$game_id?>&t=<?=$mysql_prefix?>" method="POST">
    <h3>Points</h3>
    <p><?=$team1_name?>: <input type="text" name="team1_score" size="5" value="<?=$team1_score?>" />
       <?=$team2_name?>: <input type="text" name="team2_score" size="5" value="<?=$team2_score?>" /></p>
