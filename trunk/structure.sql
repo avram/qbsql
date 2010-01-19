@@ -18,7 +18,7 @@ CREATE TABLE `qb_admin` (
         `rev` int(11) NOT NULL
 );
 
-/** Tables created on the fly
+/** Tables created on the fly by table_create_queries(..)
 CREATE TABLE {$prefix}_players (
   last_name varchar(40) default NULL,
   first_name varchar(40) default NULL,

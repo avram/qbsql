@@ -623,7 +623,7 @@ function sqbs_export_tourney($prefix) {
 /* Importer that should be able to read a tournament into the system and treat it
  * like any other QBSQL tournament
  *
- * Our approach here will be just like the SQBS exportert, just reversed; we'll
+ * Our approach here will be just like the SQBS exporter, just reversed; we'll
  * work naively line-by-line and see if it works.
  * 
  * Takes a path to the file as input.
