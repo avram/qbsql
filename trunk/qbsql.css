@@ -70,11 +70,20 @@ h2 a.edit-team, h2 a.edit-player {
     padding-left: 2em;
 }
 
-h4.headline {
+div.headline {
     background: #eef;
-    font-size: 60%;
+    font-size: 8pt;
     margin: 0;
-    padding: 0;
+    padding: 4px;
+}
+
+div.headline div#login {
+	display: inline;
+	float: right;
+}
+
+div.headline div#login p, div.headline div#login h3 {
+	display: inline;
 }
 
 div.warning {
@@ -126,8 +135,8 @@ li.tourney-list p, li.tourney-list li {
 
 /* Styling the login box */
 div#login {
-    background-color: #eecccc;
-    padding: 2px;
+/*    background-color: #eecccc;
+    padding: 2px; */
 }
 
 div#login h3, div#login p {
@@ -139,7 +148,7 @@ div#login h3 {
 }
 
 div#login * {
-	font-size: 85%;
+	font-size: 7pt;
 }
 
 /* forms styles */
