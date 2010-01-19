@@ -27,5 +27,26 @@
 <?php } ?>
 </head>
 <body>
- <h4 class="headline"><strong><?=$tourney_name?></strong> | <a href="tournaments.php">Other Tournaments</a></h4>
+<div class="headline"><strong><?=$tourney_name?></strong> | <a href="tournaments.php">Other Tournaments</a>
+<?php if (isset($mysql_prefix) && $mysql_prefix != "") {?> 
+<div id="login">
+<?php if($tourney_lock) { ?>
+<h3>Tournament locked</h3>
+<? } else if(!$auth) { ?>
+<form method="post" action="?login&t=<?=$mysql_prefix?>">
+ <h3>Login</h3>
+ <p>Username: <input type="text" name="login_u" size="10" /> Password: <input type="password" name="login_p" size="10" /> <input type="submit" value="Log in" /></p>
+ </form>
+<? } else {?>
+<form action="?" method="get">
+<p>Currently logged in to tournament.
+<input type="submit" value="Log out" />
+<input type="hidden" name="kill" value="now" />
+<input type="hidden" name="t" value="<?=$mysql_prefix?>" /></p></form>     
+ <?php
+ } // end if not locked
+} // end if prefix set
+?>
+</div>
+</div>
  <h1><?php echo $title ?></h1>
