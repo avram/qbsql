@@ -46,14 +46,14 @@ function migrate($new_rev) {
     free_result($res);
 
     // TODO somehow check that we succeeded
+    // For now, we will display an error and not update the
+    // current revision when the query fails (returns false).
     foreach ($migrations as $rev_no => $migration) {
         if ($cur_rev < $rev_no && $new_rev >= $rev_no) {
             // Run each intermediate migration in order.
-            //print_r($migration);
             migration_apply($migration, $rev_no);
         }
     } 
-    query("UPDATE qb_admin SET rev = '$new_rev'");
 }
 
 function migration_apply($migration, $rev_no) {
@@ -66,16 +66,18 @@ function migration_apply($migration, $rev_no) {
                 // For each prefix, substitute and run the migration
                 while(list($prefix) = fetch_row($res)) {
                     $part = str_replace("PFX", $prefix, $migration_part);
-                    //print $part;
                     migration_apply($part, $rev_no);
                 }
             } else {
-            	//print $migration_part;
                 migration_apply($migration_part, $rev_no);
             }
         }
     } else {
-        query($migration) or migration_error($rev_no, mysql_error() . "[$migration]", mysql_errno());
+        $res = query($migration);
+        if($res)
+        	query("UPDATE qb_admin SET rev = '$rev_no'");
+        else
+        	migration_error($rev_no, mysql_error() . "[$migration]", mysql_errno());
     }
 }
 
