@@ -1,7 +1,7 @@
 // Error checking
 
 function errorMsg(msg) {
-	alert(msg);
+	return confirm("An error was detected. Click 'OK' to proceed anyway, or 'Cancel' to correct it.\n" + msg);
 }
 
 function checkTUH(arr, teamTUH, teamName) {
@@ -9,19 +9,17 @@ function checkTUH(arr, teamTUH, teamName) {
 	for (var i = 0; i < arr.length; i++) {
 		if (arr[i].value != "") {
 			if (parseInt(arr[i].value) > teamTUH) {
-				errorMsg ("Player " + (i + 1) + " on team " + teamName + " heard more tossups than were read.");
-				return false;
+				return errorMsg ("Player " + (i + 1) + " on team " + teamName + " heard more tossups than were read.");
 			}
 			tot += parseInt(arr[i].value);
 		}
 	}
 	
 	if (tot <= 0) {
-		errorMsg ("No tossups heard for " + teamName + ".");
-		return false;
-	} else if (tot > teamTUH * 4) {
-		errorMsg ("Too many tossups heard for " + teamName + ".");
-		return false;
+		return errorMsg ("No tossups heard for " + teamName + ".");
+	}
+	if (tot > teamTUH * 4) {
+		return errorMsg ("Too many tossups heard for " + teamName + ".");
 	}
 	return true;
 }
@@ -50,8 +48,7 @@ function checkTotalAnswered(t1pows, t1tus, t2pows, t2tus, tusHeard) {
 	}
 	
 	if (tot > tusHeard) {
-		errorMsg ("More tossups were answered than read.");
-		return false;
+		return errorMsg ("More tossups were answered than read.");
 	}
 	return true;
 }
@@ -70,16 +67,14 @@ function checkTotalNegs(t1negs, t2negs, tusHeard) {
 	}
 
 	if (tot > tusHeard) {
-		errorMsg ("More negs than tossups read.");
-		return false;
+		return errorMsg ("More negs than tossups read.");
 	}
 	return true;
 }
 
 function checkScoreDivisor(score, team) {
 	if (score % 5 != 0) {
-		errorMsg("Score for team " + team + " is not a multiple of 5.");
-		return false;
+		return errorMsg("Score for team " + team + " is not a multiple of 5.");
 	}
 	return true;
 }
