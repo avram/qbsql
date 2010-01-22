@@ -1,0 +1,19 @@
+#summary Plans for development of QBSQL
+
+= Introduction =
+
+This is a rough outline of the improvements to be made in QBSQL over the coming years, with target milestones.
+
+= 0.8 =
+  * Complete tournament management by site administrator without database changes (issue 6, issue 22, issue 30, issue 31, issue 32)
+  * Packet and set labeling
+  * Unranked brackets, named brackets (issue 17, issue 18)
+  * Tossup-by-tossup entry (issue 25)
+
+= 0.9 =
+  * Unified statistics across tournaments (issue 27)
+  * New tournament result format (issue 26)
+
+= 1.0 =
+  * Tournament design (issue 8)
+  * Packet database integration
