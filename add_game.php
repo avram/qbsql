@@ -156,13 +156,14 @@
 	 <h2>Round $round, $team1 vs. $team2</h2>
 	 <form onSubmit=\"return checkInput('$team1', '$team2')\" action=\"add_game.php?submit=bork&t=$mysql_prefix\" method=\"POST\">
 	 <h3>Scores</h3>
-	 <p>$team1: <input type=\"text\" size=\"5\" name=\"team1_score\" />
+	 <p>$team1: <input type=\"text\" size=\"5\" id='team1_score' name=\"team1_score\" />
 	 $team2: <input type=\"text\" size=\"5\" name=\"team2_score\" />
 	 <input type=\"hidden\" name=\"round\" value=\"$round\" />
 	 <input type=\"hidden\" name=\"team1_id\" value=\"$team1_id\" />
 	 <input type=\"hidden\" name=\"team2_id\" value=\"$team2_id\" />
  	 </p>
-	 <p>Toss-ups heard: <input type=\"text\" size=\"5\" name=\"total_tuh\" value=\"$tourney_game_length\" /></p>
+	 <p>Toss-ups heard: <input type=\"text\" size=\"5\" id='total_tuh' name=\"total_tuh\" value=\"$tourney_game_length\" /></p>
+	 <input type='hidden' id='default_tuh' name='default_tuh' value='$tourney_game_length' />
 	 <fieldset id='overtime'>
 	 <legend>Overtime</legend>
 	 <div id='overtime-content'>
@@ -195,7 +196,7 @@
      while(list($team1_last,$team1_first,$team1_id_num) = fetch_row($res1)){
 	 echo "<tr>
 	     <td>$team1_first $team1_last <input type=\"hidden\" name=\"team1_id_num[]\" value=\"$team1_id_num\" /></td>
-	     <td><input type=\"text\" size=\"5\" name=\"team1_tuh[]\" value=\"$tourney_game_length\" /></td>
+	     <td><input type=\"text\" size=\"5\" class='player_tuh' name=\"team1_tuh[]\" value=\"$tourney_game_length\" /></td>
 	     <td><input type=\"text\" size=\"5\" name=\"team1_pow[]\" /></td>
 	     <td><input type=\"text\" size=\"5\" name=\"team1_tu[]\" /></td>
 	     <td><input type=\"text\" size=\"5\" name=\"team1_neg[]\" /></td>
@@ -221,7 +222,7 @@
      while(list($team2_last,$team2_first,$team2_id_num) = fetch_row($res2)){
          echo "<tr>
              <td>$team2_first $team2_last <input type=\"hidden\" name=\"team2_id_num[]\" value=\"$team2_id_num\" /></td>
-             <td><input type=\"text\" size=\"5\" name=\"team2_tuh[]\" value=\"$tourney_game_length\" /></td>             
+             <td><input type=\"text\" size=\"5\" class='player_tuh' name=\"team2_tuh[]\" value=\"$tourney_game_length\" /></td>             
 	     <td><input type=\"text\" size=\"5\" name=\"team2_pow[]\" /></td>
              <td><input type=\"text\" size=\"5\" name=\"team2_tu[]\" /></td>
              <td><input type=\"text\" size=\"5\" name=\"team2_neg[]\" /></td>
@@ -345,9 +346,9 @@
 ?>
    <form onSubmit="return checkInput('<?=$team1_name?>', '<?=$team2_name?>')" action="?modify=<?=$game_id?>&t=<?=$mysql_prefix?>" method="POST">
    <h3>Points</h3>
-   <p><?=$team1_name?>: <input type="text" name="team1_score" size="5" value="<?=$team1_score?>" />
+   <p><?=$team1_name?>: <input type="text" id="team1_score" name="team1_score" size="5" value="<?=$team1_score?>" />
       <?=$team2_name?>: <input type="text" name="team2_score" size="5" value="<?=$team2_score?>" /></p>
-   	 <p>Toss-ups heard: <input type="text" size="5" name="total_tuh" value="<?=$tuh?>" />
+   	 <p>Toss-ups heard: <input type="text" size="5" id="total_tuh" name="total_tuh" value="<?=$tuh?>" />
    	  <input type="hidden" name="game_id" value="<?=$game_id?>" />
    	 </p>
    	 <fieldset id='overtime'>
@@ -440,7 +441,7 @@
     <p></p>
     <h2>Select teams</h2>
     <p>
-    <select name="team1">
+    <select name="team1" id="team1_picker">
 <?php
     // We need to get the list of teams to present a drop-down menu of them
      $res = query("SELECT full_name,id FROM {$mysql_prefix}_teams ORDER BY full_name");
