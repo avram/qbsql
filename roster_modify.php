@@ -14,7 +14,9 @@
  // try to apply deletes
  if(isset($_GET["delete"]) && is_numeric($_GET["delete"]) && $_POST["confirm"] == "yes") {
     $pid = $_GET["delete"];
- 	$player_query = "SELECT p.first_name, p.last_name, t.full_name, COUNT(rp.game_id)
+ 	$player_query = "SELECT p.first_name, p.last_name, t.full_name,
+ 						COUNT(rp.game_id),
+ 						SUM(IF(rp.tu_heard>0,1,0))
  	              FROM {$mysql_prefix}_teams AS t,
  	                  {$mysql_prefix}_players AS p
  	              LEFT JOIN
@@ -24,18 +26,35 @@
  	              GROUP BY p.id
  	              LIMIT 1";
     $p_res = query($player_query) or die(mysql_error());
-    list($fn, $ln, $team, $rnd_ct) = fetch_row($p_res);
-    if($rnd_ct > 0) { // We refuse to delete if there are records that would be orphaned.
-        warning("Cannot delete player <b>$fn $ln</b> ($team). This player has game records, which must be deleted first.",
+    list($fn, $ln, $team, $rnd_ct, $rnd_ct_tuh) = fetch_row($p_res);
+    if($rnd_ct > 0 && $rnd_ct_tuh > 0) {
+    	// We refuse to delete if there are records that would be orphaned.
+        	warning("Cannot delete player <b>$fn $ln</b> ($team). This player has game records, which must be deleted first.
+        		 A player can be deleted if you set the player's tossups heard to 0 for each
+        		 of his games.",
                 "Go to \"Round summaries\"","stats_round.php");
-    } elseif (isset($fn)) {
-        $del_query = "DELETE FROM {$mysql_prefix}_players WHERE id = '$pid' LIMIT 1";
-        $del_res = query($del_query);
-        if($del_res) {
-            message("Player <b>$fn $ln</b> ($team) deleted.");
-        } else {
-            warning("Delete failed for unknown reasons.");
-        }
+    }
+    if (isset($fn) && ($rnd_ct == 0 || $rnd_ct_tuh == 0) ) {
+    	if ($rnd_ct > 0) { // Delete the rounds_players entries
+    		$del_rp_query = "DELETE FROM {$mysql_prefix}_rounds_players
+    							WHERE player_id = '$pid' LIMIT $rnd_ct";
+    		$del_rp_res = query($del_rp_query)
+    	        	or dbwarning("Error deleting round records for player",
+    	        					$del_rp_query);	
+    	}
+    	if (!isset($del_rp_query) || $del_rp_res) {
+    		// Refuse to delete player record if we failed to delete
+    		// round records, so we don't orphan them.
+        	$del_query = "DELETE FROM {$mysql_prefix}_players WHERE id = '$pid'
+        						LIMIT 1";
+        	$del_res = query($del_query)
+                or dbwarning("Error deleting player record", $del_query);
+        	if($del_res) {
+            	message("Player <b>$fn $ln</b> ($team) deleted.");
+        	} else {
+            	warning("Delete failed for unknown reasons.");
+        	}
+    	}
     } else {
  	    warning("Cannot delete. Player not found.");
     }
