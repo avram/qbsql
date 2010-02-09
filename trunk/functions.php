@@ -390,7 +390,8 @@ function verify_game($id) {
 	
 	for ($i=1;$i<count($line);$i++) {
 		if($apply[$i] == 1 && $line[$i] != 1) {
-			warning("Data integrity check failed: ".$messages[$i-1]);
+			warning("The following data integrity check failed: ".$messages[$i-1]
+			 . "\nCheck the game data and resubmit if necessary.");
 		}
 	}
 }
