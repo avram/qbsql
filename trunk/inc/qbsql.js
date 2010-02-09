@@ -1,5 +1,18 @@
-// Error checking
-
+/* Error Checking for game entry.
+ * 
+ * We check each of the following. If any is not true, we
+ * notify the user.
+ * Note: Not all checks are implemented.
+ * TODO Implement remaining checks.
+	1. Total score % 5 == 0
+	2. [ Total individual TUs heard > 0; <= 4 * TUs heard team
+Individual TUs heard <= TUS heard team ]
+	3. [ Total TUs answered <= TUs heard team ]
+	4. [ Total negs <= TUs heard team ]
+	5. Bonus conversion <= 30, >= 0
+	6. Individual Buzzes <= individual TUs heard
+	7. Team buzzes <= Team TUs heard
+*/
 function errorMsg(msg) {
 	return confirm("An error was detected. Click 'OK' to proceed anyway, or 'Cancel' to correct it.\n" + msg);
 }
@@ -79,23 +92,6 @@ function checkScoreDivisor(score, team) {
 	return true;
 }
 
-/*
-Total score % 5 == 0
-
-[ Total individual TUs heard > 0; <= 4 * TUs heard team
-Individual TUs heard <= TUS heard team ]
-
-[ Total TUs answered <= TUs heard team ]
-
-[ Total negs <= TUs heard team ]
-
-Bonus conversion <= 30, >= 0
-
-Individual Buzzes <= individual TUs heard
-
-Team buzzes <= Team TUs heard -- necessary?
-*/
-
 function checkInput(team1, team2) {
 	var t1score = parseInt(document.getElementsByName("team1_score")[0].value);
 	if (!checkScoreDivisor(t1score, team1)) return false;
@@ -122,15 +118,41 @@ function checkInput(team1, team2) {
 }
 
 
-// sorter
+// On load actions
 $(document).ready(function() 
     {
+		// Sorter for sorted tables
         $(".sort").tablesorter({widgets: ['zebra']});
+        
+        // Hiding and showing of the overtime box
         $("#overtime-content").hide();
         $("fieldset#overtime legend").click(function() {
         	$("#overtime-content").toggle("fast");
         })
     } 
+);
+
+/** Smart actions for game entry **/
+$(document).ready(function() 
+	{	
+		// Keyboard focus
+		$("#team1_score").focus();
+		$("#team1_picker").focus();
+		
+		// TUH update
+		$("#total_tuh").change(function() {
+			// Change only if not to the default
+			if($(this).val() != $("#default_tuh").val()) {
+				// Pull the player TUH fields
+				$(".player_tuh").each(function() {
+					// Set the ones that had been set to old default
+					if($(this).val() == $("#default_tuh").val()) {
+						$(this).val($("#total_tuh").val());
+					}
+				});
+			}
+		});
+	}
 );
 
 // Custom layout from (MIT & GPL dual licensed):
