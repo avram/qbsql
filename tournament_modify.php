@@ -43,7 +43,7 @@
              			  $query);
          }
          // If we have SQBS data, import it now
-         if(isset($_FILES['sqbs'])) {
+         if(isset($_FILES['sqbs']) && $_FILES['sqbs']["tmp_name"] != "") {
          	sqbs_import_tourney($_FILES['sqbs']["tmp_name"], $prefix);
          }
             // redirect to tournament list
@@ -71,6 +71,11 @@ RED;
      <form id="newtourney" action="?action=add" method="post" enctype="multipart/form-data">
      <fieldset id="basic">
      <legend>Tournament Settings</legend>
+     <p class="instructions">When choosing the tournament username and password,
+     keep in mind that you will need to share them with all staff who will be
+     entering statistics during the tournament. Additionally, there is currently
+     no way to reset tournament passwords, so choose something simple and
+     memorable.</p>
      <ol>
       <li><label for="name">Name: </label>
       <input type="text" size="30" name="name" tabindex="1" id="name" /></li>
@@ -94,6 +99,8 @@ RED;
       </fieldset>
       <fieldset id="authentication">
       <legend>Authentication</legend>
+      <p class="instructions">Enter the master username and password for the stats
+      server. Contact the site administrator if you do not have these credentials.</p>
       <ol>
       <li><label for="master_un">Master username: </label>
       <input type="text" size="30" name="master_un" id="master_un" tabindex="9" /></li>
