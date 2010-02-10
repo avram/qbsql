@@ -51,11 +51,10 @@
  	$players_valid = TRUE;
  	for($i = 0; $i < $_POST["team1_size"]; $i++) {
  		$players_valid = ($players_valid && is_numeric($_POST["team1_pid"][$i])
- 							&& is_numeric($_POST["team1_tuh"][$i])
- 							&& is_numeric($_POST["team1_pow"][$i])
- 							&& is_numeric($_POST["team1_tup"][$i])
- 							&& is_numeric($_POST["team1_pid"][$i])
- 							&& is_numeric($_POST["team1_neg"][$i]));
+ 							&& (($_POST["team1_tuh"][$i] == "") || is_numeric($_POST["team1_tuh"][$i]))
+ 							&& (($_POST["team1_pow"][$i] == "") || is_numeric($_POST["team1_pow"][$i]))
+ 							&& (($_POST["team1_tup"][$i] == "") || is_numeric($_POST["team1_tup"][$i]))
+ 							&& (($_POST["team1_neg"][$i] == "") || is_numeric($_POST["team1_neg"][$i])));
  		$player1_query[$i] = "UPDATE {$mysql_prefix}_rounds_players SET" .
  				"				tu_heard='{$_POST[team1_tuh][$i]}', powers='{$_POST[team1_pow][$i]}'," .
  				"				tossups='{$_POST[team1_tup][$i]}', negs='{$_POST[team1_neg][$i]}' " .
@@ -63,11 +62,10 @@
  	}
  	for($i = 0; $i < $_POST["team2_size"]; $i++) {
  		$players_valid = ($players_valid && is_numeric($_POST["team2_pid"][$i])
- 							&& is_numeric($_POST["team2_tuh"][$i])
- 							&& is_numeric($_POST["team2_pow"][$i])
- 							&& is_numeric($_POST["team2_tup"][$i])
- 							&& is_numeric($_POST["team2_pid"][$i])
- 							&& is_numeric($_POST["team2_neg"][$i]));
+ 							&& (($_POST["team2_tuh"][$i] == "") || is_numeric($_POST["team2_tuh"][$i]))
+ 							&& (($_POST["team2_pow"][$i] == "") || is_numeric($_POST["team2_pow"][$i]))
+ 							&& (($_POST["team2_tup"][$i] == "") || is_numeric($_POST["team2_tup"][$i]))
+ 							&& (($_POST["team2_neg"][$i] == "") || is_numeric($_POST["team2_neg"][$i])));
  		$player2_query[$i] = "UPDATE {$mysql_prefix}_rounds_players SET" .
  				"				tu_heard='{$_POST[team2_tuh][$i]}', powers='{$_POST[team2_pow][$i]}'," .
  				"				tossups='{$_POST[team2_tup][$i]}', negs='{$_POST[team2_neg][$i]}' " .
@@ -239,6 +237,7 @@
    }
  } else if ($_GET["submit"]=="bork") {
      // check data integrity
+     // TODO Check integrity of player data
      $integrity = (is_numeric($_POST["team1_id"]) && is_numeric($_POST["team2_id"])
           && is_numeric($_POST["team1_score"]) && is_numeric($_POST["team2_score"])
               && is_numeric($_POST["total_tuh"]) && is_numeric($_POST["round"]));
