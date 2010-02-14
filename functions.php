@@ -310,7 +310,9 @@ function fetch_brackets() {
 function verify_game($id) {
 	global $mysql_prefix;
 	
+	// TODO Make these adjustable preferences.
 	$gcd = 5;
+	$bmax = 30;
 	$messages = array(	"Score 1 GCD",
 						"Score 2 GCD",
 						"Bonus 1 GCD",
@@ -327,7 +329,9 @@ function verify_game($id) {
 						"Team 2 tups valid",
 						"Team 2 pows valid",
 						"Team 2 negs valid",
-						"Team 2 tossups <= TUH"
+						"Team 2 tossups <= TUH",
+						"Team 1 BConv <= BMax",
+						"Team 2 BConv <= BMax"
 	);
 	// Do all the checking in SQL
 	$query = "SELECT	forfeit = r.team1 || forfeit = r.team2,
@@ -350,7 +354,9 @@ function verify_game($id) {
 						p2.tupv = 0,
 						p2.powv = 0,
 						p2.negv = 0,
-						p2.ct = 0
+						p2.ct = 0,
+						(r.score1 - (p1.tup * 10 + p1.pow * 15 - p1.neg * 5))/(p1.tup + p1.pow) <= $bmax,
+						(r.score2 - (p2.tup * 10 + p2.pow * 15 - p2.neg * 5))/(p2.tup + p2.pow) <= $bmax
 				FROM {$mysql_prefix}_rounds AS r,
 					(SELECT	SUM(tossups) AS tup,
 							SUM(powers) AS pow,
@@ -380,7 +386,7 @@ function verify_game($id) {
 	$res = query($query) or dbwarning("Validation query failed.", $query);
 	
 	// mask with desired checks
-	$apply = array(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1);
+	$apply = array(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1);
 	
 	$line = fetch_row($res);
 	

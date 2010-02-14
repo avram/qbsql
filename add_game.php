@@ -84,7 +84,7 @@
   		}
   		// Check entered data and warn of issues
   		verify_game($_GET["modify"]);
-  		message("Game changes applied.");
+  		message("Game changes applied. <a href='game_detail.php?t=$mysql_prefix&game=$_GET[modify]'>View game</a>");
  	} else {
  		warning("Invalid inputs");
  	}
@@ -286,7 +286,7 @@
          $play_query =  "INSERT INTO {$mysql_prefix}_rounds_players SET player_id=\"$id\" , team_id=\"$_POST[team2_id]\", powers=\"".$_POST["team2_pow"][$i]."\", tossups=\"".$_POST["team2_tu"][$i]."\", negs=\"".$_POST["team2_neg"][$i]."\", round_id=\"".$_POST["round"]."\", tu_heard=\"".$_POST["team2_tuh"][$i]."\", game_id=\"$game_id\"";
          query($play_query) or dbwarning("Choked adding team 2 records",$play_query);
      } 
-     message("The round was added successfully.");
+     message("The round was added successfully. <a href='game_detail.php?t=$mysql_prefix&game=$game_id'>View game</a>");
      // Check entered data and warn of issues
   	 verify_game($game_id);
  	}
