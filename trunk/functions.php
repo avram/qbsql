@@ -355,8 +355,8 @@ function verify_game($id) {
 						p2.powv = 0,
 						p2.negv = 0,
 						p2.ct = 0,
-						(r.score1 - (p1.tup * 10 + p1.pow * 15 - p1.neg * 5))/(p1.tup + p1.pow) <= $bmax,
-						(r.score2 - (p2.tup * 10 + p2.pow * 15 - p2.neg * 5))/(p2.tup + p2.pow) <= $bmax
+						(r.score1 - (p1.tup * 10 + p1.pow * 15 - p1.neg * 5))/(p1.tup + p1.pow - r.ot_tossups1) <= $bmax,
+						(r.score2 - (p2.tup * 10 + p2.pow * 15 - p2.neg * 5))/(p2.tup + p2.pow - r.ot_tossups2) <= $bmax
 				FROM {$mysql_prefix}_rounds AS r,
 					(SELECT	SUM(tossups) AS tup,
 							SUM(powers) AS pow,
