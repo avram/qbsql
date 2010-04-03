@@ -3,7 +3,7 @@
 
 CREATE TABLE `tournaments` (
       `id` int(11) NOT NULL auto_increment,
-      `name` varchar(45) NOT NULL,
+      `name` varchar(100) NOT NULL,
       `prefix` varchar(20) NOT NULL,
       `username` varchar(30) NOT NULL,
       `password` varchar(30) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE `tournaments` (
 );
 
 CREATE TABLE `qb_admin` (
-        `rev` int(11) NOT NULL
+        `rev` int(11) NOT NULL default '94'
 );
 
 /** Tables created on the fly by table_create_queries(..)
