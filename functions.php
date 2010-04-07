@@ -164,7 +164,7 @@ class StatsTable {
 
     function table() {
         if($this->sort) {
-            $sort_id = "sort";
+            $sort_id = "tablesorter";
         }
         $final .= "<table class='$this->class $sort_id'>\n";
         $final .= $this->html;
@@ -196,7 +196,10 @@ class StatsTable {
         $columns = 0;
         while ($line = fetch_assoc($result)) {
             $columns = 0;
-            $this->html .= "\t<tr>\n";
+	    // Since the zebra widget for tablesorter doesn't style correctly,
+	    // we set the row classes manually.
+	    $oddity = (($i % 2) == 0) ? "even" : "odd";
+            $this->html .= "\t<tr class='$oddity'>\n";
             if ($this->ranks) {
                 $columns++;
                 $this->html .= "\t\t<td>$i</td>\n";
