@@ -122,7 +122,7 @@ function checkInput(team1, team2) {
 $(document).ready(function() 
     {
 		// Sorter for sorted tables
-        $(".sort").tablesorter({widgets: ['zebra']});
+        $(".tablesorter").tablesorter({widgets: ['zebra']});
         
         // Hiding and showing of the overtime box
         $("#overtime-content").hide();
