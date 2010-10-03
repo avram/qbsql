@@ -2,21 +2,19 @@
 
 = Introduction =
 
-This is a rough outline of the improvements to be made in QBSQL over the coming years, with target milestones.
+This is a rough outline of the improvements to be made in QBSQL over the coming years, with target milestones. Development tends to happen rather fitfully, but the contributions of other interested people are very welcome, in accordance with this roadmap or not.
 
 = 0.8 =
-The current target for 0.8 is shortly after SCT 2010, in mid-February.
   * Complete tournament management by site administrator without database changes (issue 6, issue 22, issue 30, issue 31, issue 32)
   * Packet and set labeling
   * Unranked brackets, named brackets (issue 17, issue 18)
   * Tossup-by-tossup entry (issue 25)
 
 = 0.9 =
-This should be done by early spring 2010, perhaps mid-March.
   * Unified statistics across tournaments (issue 27)
   * New tournament result format (issue 26)
 
 = 1.0 =
-This is a longer-term target, possibly for summer or fall 2010. Additional major improvements will be for 1.0 and beyond.
+This is a longer-term target. Additional major improvements will be for 1.0 and beyond.
   * Tournament design (issue 8)
   * Packet database integration
