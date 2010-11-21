@@ -10,8 +10,7 @@
  * Note, however, that that will reveal all of the tournament passwords.
  *
  * The default behavior is to output something like the SQBS format, which is
- * sufficient for the NAQT results database. It probably isn't enough to be
- * imported by SQBS itself.
+ * sufficient for the NAQT results database. It can also be imported by SQBS itself
  */
 
 /* init.php */
