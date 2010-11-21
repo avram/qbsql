@@ -135,13 +135,13 @@
 	 		$play_query =  "INSERT INTO {$mysql_prefix}_rounds_players
 	 					SET player_id='$pid' , team_id='$team1_id',
 	 						round_id='$round', tu_heard='0', game_id='$game_id'";
-	 		query($play_query) or dbwarning("Choked adding team 1 records", $play_query);
+	 		query($play_query) or dbwarning("Choked adding team 1 ($team1) records", $play_query);
      	}
      	while(list($pid) = fetch_row($res2)){ 
 	 		$play_query =  "INSERT INTO {$mysql_prefix}_rounds_players
 	 					SET player_id='$pid' , team_id='$team2_id',
 	 						round_id='$round', tu_heard='0', game_id='$game_id'";
-	 		query($play_query) or dbwarning("Choked adding team 2 records", $play_query);
+	 		query($play_query) or dbwarning("Choked adding team 2 ($team2) records", $play_query);
      	}
      	message("The forfeit was recorded.");
      } else if ($logic) {     

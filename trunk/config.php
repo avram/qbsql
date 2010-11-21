@@ -17,6 +17,7 @@ $mysql_db = "my_database";
 $debug = TRUE;
 
 // set mysql library in use (mysql or mysqli)
+// FIXME The system currently works only with the mysql library
 //$mysql_library = "mysqli";
 $mysql_library = "mysql";
 
