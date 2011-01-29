@@ -3,7 +3,7 @@
  *
  * Administrative tasks for the TD.
  *
- * This uses wymeditor to edit the tournament description.
+ * This uses TinyMCE to edit the tournament description.
  *
  * Author: Avram Lyon 
  * Created: 10 February 2009
@@ -22,7 +22,7 @@
  			$_GET["t"]);
  	query($query) or dbwarning("Failed to lock tournament.",$query);
  	message("If no warning appeared, the tournament has been locked.");
- 	$auth=false;
+ 	$auth = false;
  	require "foot.php";
  	die();
  }
@@ -70,9 +70,9 @@
 <h2>Settings</h2>
 <form action="?a=edit&t=<?=$mysql_prefix?>" method="post">
 <p><label for="name">Tournament Name</label><input size=25 name="name" id="name" value="<?=$tourney_name?>" /></p>
-<p><label for="desc">Tournament Description</label><textarea name="desc" rows=10 cols=40 id="desc" class="wymeditor"><?=$tourney_desc?></textarea></p>
+<p><label for="desc">Tournament Description</label><textarea name="desc" rows=10 cols=40 id="desc" class="editor"><?=$tourney_desc?></textarea></p>
 <p><label for="length">Default Round Length</label><input name="length" id="length" value="<?=$tourney_game_length?>" /></p>
-<p><input type="submit" class="wymupdate" value="Update" /></p>
+<p><input type="submit" value="Update" /></p>
 </form>
 <h2>Export</h2>
 <p class="instructions">Save the generated file and open it with SQBS.

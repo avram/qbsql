@@ -496,19 +496,22 @@ function export_database() {
     while($row = fetch_row($res)) {
         print 'INSERT INTO tournaments VALUES ("';
         print implode('","', $row);
-        print "\");\n";
+        print '");\n';
         export_tournament($row[2]);
     }
 }
 
 /*
  * This export function is based on R. Hentzel's description of the SQBS
- * data file format, and tested against the NAQT results importer. The file
- * created by the exporter has not been tested against SQBS itself, and
- * probably cannot be read by SQBS. It does, however, work with the NAQT
- * importer and QBSQL's own importer.
+ * data file format, and tested against the NAQT results importer.
+ * The file created by the exporter has been tested against SQBS itself,
+ * and it can be read by SQBS. There are probably some limitations.
+ * It does, however, work with the NAQT importer and QBSQL's own importer.
  * 
  * The SQBS data format is a series of newline-separated fields.
+ * 
+ * Note that the SQBS data format is lossy for teams with more than 7
+ * players.
  */
 function sqbs_export_tourney($prefix) {
     $sqbs = "";
@@ -584,7 +587,7 @@ function sqbs_export_tourney($prefix) {
         $sqbs .= $ot_tu1."\n";                    // team1 # correct OT tups
         $sqbs .= $ot_tu2."\n";                   // team2  --same--
         $forfeit = ($forfeit == $t1) ? 1 : 0; 	// FIXME We cannot rely on the first
-        										// team always being the forfeiting one.
+						// team always being the forfeiting one.
         $sqbs .= "$forfeit\n";                  // forfeit (1=team1 forfeit, 0=no)
         /* The next two values are unlikely to be supported by QBSQL */
         $sqbs .= "0\n";         // lightning t1 pts
@@ -597,6 +600,8 @@ function sqbs_export_tourney($prefix) {
         $p2_res_sc = query("SELECT tu_heard, powers, tossups, negs, player_id FROM {$prefix}_rounds_players WHERE game_id = '$game' AND team_id='$t2'") or die(mysql_error());
         /* SQBS requires that there be 7 player lines per team */
         /* unneeded player lines are filled with zeroes */
+	/* XXX Since SQBS only handles 7 players per team, we can't export more than that.
+	   Players beyond the first 7 on a team will be cut off. */
         while ($p_buffer <= 7) {
             if(list($p_tuh, $pows, $tups, $negs, $pid) = fetch_row($p1_res_sc)) {
                 $sqbs .= $p_id_to_index[$pid]."\n"; // player index of player1
@@ -708,8 +713,8 @@ function sqbs_import_tourney($file, $mysql_prefix) {
 		$ot_tup2 = array_shift($in); 	// overtime tossups 2
 		$forfeit = array_shift($in); 	// forfeit (1=team1 forfeit, 0=no)
 		/* The next two values are unlikely to be supported by QBSQL */
-        $light1 = array_shift($in);         // lightning t1 pts
-        $light2 = array_shift($in);         // lightning t2 pts
+		$light1 = array_shift($in);         // lightning t1 pts
+		$light2 = array_shift($in);         // lightning t2 pts
 		
         // Set forfeit to be first team
         $forfeit = ($forfeit == 1) ? "forfeit = '$t1id'" : "forfeit = NULL";
@@ -756,10 +761,10 @@ function sqbs_import_tourney($file, $mysql_prefix) {
         	} else {
         		array_shift($in);
         		array_shift($in);
-              	array_shift($in);
-        	    array_shift($in);
-        	    array_shift($in);
-        	    array_shift($in);
+			array_shift($in);
+			array_shift($in);
+			array_shift($in);
+			array_shift($in);
         	}
         	$index = array_shift($in);
         	if(array_key_exists($index, $p_index_to_id[$t2])) {
@@ -784,10 +789,10 @@ function sqbs_import_tourney($file, $mysql_prefix) {
         	} else {
         		array_shift($in);
         		array_shift($in);
-              	array_shift($in);
-        	    array_shift($in);
-        	    array_shift($in);
-        	    array_shift($in);
+			array_shift($in);
+			array_shift($in);
+			array_shift($in);
+			array_shift($in);
         	}
         }
         /* The SQBS data file has more here, but we don't need it to work with the
