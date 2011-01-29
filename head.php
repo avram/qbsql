@@ -22,7 +22,8 @@
 <?php if(isset($js_includes) && $js_includes) { // Don't include JS if not needed ?> 
  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.0/jquery.min.js"></script>
  <script type="text/javascript" src="inc/jquery.tablesorter.min.js"></script>
- <script type="text/javascript" src="inc/wymeditor/wymeditor/jquery.wymeditor.pack.js"></script>
+ <script type="text/javascript" src="inc/tiny_mce.js"></script>
+ <script type="text/javascript" src="inc/jquery.tinymce.js"></script>
  <script type="text/javascript" src="inc/qbsql.js"></script>
 <?php } ?>
 </head>
