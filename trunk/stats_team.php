@@ -174,8 +174,8 @@ $js_includes = true;
 		    SUM(powers) as pow,
 		    SUM(tossups) as tups,
 		    SUM(negs) AS neg,
-		    team_id, round_id 
-                    from {$mysql_prefix}_teams,{$mysql_prefix}_rounds_players where {$mysql_prefix}_teams.id={$mysql_prefix}_rounds_players.team_id group by round_id,team_id
+		    team_id, game_id 
+                    from {$mysql_prefix}_teams,{$mysql_prefix}_rounds_players where {$mysql_prefix}_teams.id={$mysql_prefix}_rounds_players.team_id group by game_id,team_id
                             ) AS {$mysql_prefix}_tut1, 
                         (
 		    select SUM(powers*15+tossups*10+negs*(-5)) as tup,
@@ -183,19 +183,19 @@ $js_includes = true;
 		    SUM(powers) as pow,
 		    SUM(tossups) as tups,
 		    SUM(negs) AS neg,
-		    team_id, round_id 
-                    from {$mysql_prefix}_teams,{$mysql_prefix}_rounds_players where {$mysql_prefix}_teams.id={$mysql_prefix}_rounds_players.team_id group by round_id,team_id
+		    team_id, game_id 
+                    from {$mysql_prefix}_teams,{$mysql_prefix}_rounds_players where {$mysql_prefix}_teams.id={$mysql_prefix}_rounds_players.team_id group by game_id,team_id
                             ) AS {$mysql_prefix}_tut2,
 			    {$mysql_prefix}_rounds, 
 			    {$mysql_prefix}_teams AS t1, {$mysql_prefix}_teams AS t2
 			WHERE t1.id={$mysql_prefix}_rounds.team1
 			    AND t2.id={$mysql_prefix}_rounds.team2
-			    AND {$mysql_prefix}_tut1.round_id={$mysql_prefix}_rounds.id
+			    AND {$mysql_prefix}_tut1.game_id={$mysql_prefix}_rounds.game_id
 			    AND {$mysql_prefix}_tut1.team_id=t1.id
-			    AND {$mysql_prefix}_tut2.round_id={$mysql_prefix}_rounds.id
+			    AND {$mysql_prefix}_tut2.game_id={$mysql_prefix}_rounds.game_id
                             AND {$mysql_prefix}_tut2.team_id=t2.id
                             AND (t1.id=$teamid OR t2.id=$teamid)
-			ORDER BY {$mysql_prefix}_rounds.id ASC";
+			ORDER BY {$mysql_prefix}_rounds.id, {$mysql_prefix}_rounds.game_id ASC";
 //	 print "<textarea>$query</textarea>";
 	 $res1= query($query) or dberror("Error on team detail",$query);
      table($res1,array("Round","Opponent","Result","Score",
