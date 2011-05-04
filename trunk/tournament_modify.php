@@ -85,7 +85,7 @@ RED;
       <input type="text" size="30" name="prefix" tabindex="2" id="name" />
       <p>letters and numbers only</p></li>
       <li><label for="desc">Description: </label>
-      <textarea rows="6" cols="20" name="desc" tabindex="3" id="desc" class="wymeditor"></textarea></li>
+      <textarea rows="6" cols="20" name="desc" tabindex="3" id="desc" class="editor"></textarea></li>
       <li><label for="len">Default game length: </label>
       <input type="text" size="4" name="len" value="20" tabindex="4" id="len" />
       <p>tossups per round</p></li>
