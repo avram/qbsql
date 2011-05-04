@@ -16,7 +16,7 @@
      $master = ($_POST["master_un"] == $master_username) && 
          ($_POST["master_pw"] == $master_password);
      $confirm = ($_POST["pw"] == $_POST["pw2"]);
-     $prefix_ok = preg_match("/^[^a-zA-Z0-9_]+$/", $_POST["prefix"]);
+     $prefix_ok = preg_match("/^[a-zA-Z0-9_]+$/", $_POST["prefix"]);
      $prefix_ok = $prefix_ok && !strstr("PFX", $_POST["prefix"]); // prevent migration scripts from breaking
      
      if($prefix_ok) {
