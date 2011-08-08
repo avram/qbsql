@@ -85,7 +85,7 @@ RED;
       <input type="text" size="30" name="prefix" tabindex="2" id="name" />
       <p>letters and numbers only</p></li>
       <li><label for="desc">Description: </label>
-      <textarea rows="6" cols="20" name="desc" tabindex="3" id="desc" class="editor"></textarea></li>
+      <textarea rows="15" cols="50" name="desc" tabindex="3" id="desc" class="editor"></textarea></li>
       <li><label for="len">Default game length: </label>
       <input type="text" size="4" name="len" value="20" tabindex="4" id="len" />
       <p>tossups per round</p></li>
@@ -97,6 +97,16 @@ RED;
       <input type="password" size="30" name="pw" tabindex="7" id="pw" /></li>
       <li><label for="pw2">Confirm password: </label>
       <input type="password" size="30" name="pw2" tabindex="8" id="pw2" /></li>
+      </ol>
+      </fieldset>
+      <fieldset id="api">
+      <legend>API Access</legend>
+      <p class="instructions">Use the key below for API access to the tournament. Keep this key in a secure place. If the key has been compromised, you can regenerate it from the tournament settings page.</p>
+      <ol>
+      <li><label for="api_key">API Key: </label>
+      <input type="text" size="30" name="api_key" id="api_key" />
+      <button id="api_generate">Regenerate</button>
+      </li>
       </ol>
       </fieldset>
       <fieldset id="authentication">
