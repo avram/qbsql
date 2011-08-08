@@ -28,10 +28,11 @@
  }
  if($_GET["a"] == "edit" && isset($_POST["name"]) && $_POST["name"] != "") {
      $q = sprintf("UPDATE tournaments SET name='%s',
-         description='%s', game_length='%s' WHERE prefix='%s'",
+         description='%s', game_length='%s', api_key='%s' WHERE prefix='%s'",
          $_POST["name"],
          $_POST["desc"],
          $_POST["length"],
+         $_POST["api_key"],
          //mysql_escape_string($_POST["name"]),
          //mysql_escape_string($_POST["desc"]),
          //mysql_escape_string($_POST["length"]),
@@ -41,24 +42,25 @@
      // if we failed, try to restore
      if(!$success) {
          $q = sprintf("UPDATE tournaments SET name='%s',
-             description='%s', game_length='%s' WHERE prefix='%s'",
+             description='%s', game_length='%s', api_key='%s' WHERE prefix='%s'",
              $tourney_name,
              $tourney_desc,
              $tourney_game_length,
+             $tourney_api_key,
              $mysql_prefix
          );
          $success = query($q) or dbwarning("Tournament settings restore failed.", $q);
          if (!$success)
              die();
      }
-     $res = query("SELECT name, username, password, locked, game_length, description
+     $res = query("SELECT name, username, password, locked, game_length, description, api_key
                         FROM tournaments
                         WHERE prefix = '$mysql_prefix'
                         LIMIT 1");
 
      if($row = fetch_row($res)) {
          list($tourney_name, $tourney_un, $tourney_pass, $tourney_lock,
-             $tourney_game_length, $tourney_desc) = $row;
+             $tourney_game_length, $tourney_desc, $tourney_api_key) = $row;
      }
 
      message("Tournament updated.");
@@ -72,16 +74,10 @@
 <p><label for="name">Tournament Name</label><input size=25 name="name" id="name" value="<?=$tourney_name?>" /></p>
 <p><label for="desc">Tournament Description</label><textarea name="desc" rows=10 cols=40 id="desc" class="editor"><?=$tourney_desc?></textarea></p>
 <p><label for="length">Default Round Length</label><input name="length" id="length" value="<?=$tourney_game_length?>" /></p>
-      <fieldset id="api">
-      <legend>API Access</legend>
-      <p class="instructions">Use the key below for API access to the tournament. Keep this key in a secure place. If the key has been compromised, you can regenerate it from the tournament settings page.</p>
-      <ol>
-      <li><label for="api_key">API Key: </label>
-      <input type="text" size="30" name="api_key" id="api_key" />
-      <button id="api_generate">Regenerate</button>
-      </li>
-      </ol>
-      </fieldset>
+<p class="instructions">Use the key below for API access to the tournament. Keep this key in a secure place. If the key has been compromised, you can regenerate it from the tournament settings page.</p>
+<p><label for="api_key">API Key</label><input type="text" size="40" name="api_key" id="api_key" value="<?=$tourney_api_key?>" />
+      <input type="button" id="api_generate" value="Regenerate" />
+</p>
 <p><input type="submit" value="Update" /></p>
 </form>
 <h2>Export</h2>

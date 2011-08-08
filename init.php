@@ -11,20 +11,20 @@
 
     // If we have a database migration, do it.
     /* Minimum db revision for this version of the code */
-    $required_rev = 94;
+    $required_rev = 103;
     require_once("migrations.php");
     migrate($required_rev);
 
     // set tournament
     if (isset($_GET["t"]) && !preg_match("/[^a-zA-Z0-9_]/", $_GET["t"])) {
-        $res = query("SELECT name, username, password, locked, game_length, description
+        $res = query("SELECT name, username, password, locked, game_length, description, api_key
                         FROM tournaments
                         WHERE prefix = '$_GET[t]'
                         LIMIT 1");
 
         if($row = fetch_row($res)) {
             list($tourney_name, $tourney_un, $tourney_pass, $tourney_lock,
-                $tourney_game_length, $tourney_desc) = $row;
+                $tourney_game_length, $tourney_desc, $tourney_api_key) = $row;
             $mysql_prefix = $_GET["t"];
         } else {
             // redirect to tournament list

@@ -29,7 +29,8 @@ function migrate($new_rev) {
 					array("PFX" => "ALTER TABLE PFX_rounds ADD COLUMN ot int(20) default 0 NOT NULL"),
 					array("PFX" => "ALTER TABLE PFX_rounds ADD COLUMN ot_tossups1 int(20) default 0 NOT NULL"),
 					array("PFX" => "ALTER TABLE PFX_rounds ADD COLUMN ot_tossups2 int(20) default 0 NOT NULL")),
-        94 => array("ALTER TABLE tournaments MODIFY name varchar(100) NOT NULL")
+        94 => array("ALTER TABLE tournaments MODIFY name varchar(100) NOT NULL"),
+        103 => array("ALTER TABLE tournaments ADD COLUMN api_key varchar(50) default NULL")
 	);
 
     // The first step is to make sure that we have an admin database
