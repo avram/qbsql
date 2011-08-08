@@ -72,6 +72,16 @@
 <p><label for="name">Tournament Name</label><input size=25 name="name" id="name" value="<?=$tourney_name?>" /></p>
 <p><label for="desc">Tournament Description</label><textarea name="desc" rows=10 cols=40 id="desc" class="editor"><?=$tourney_desc?></textarea></p>
 <p><label for="length">Default Round Length</label><input name="length" id="length" value="<?=$tourney_game_length?>" /></p>
+      <fieldset id="api">
+      <legend>API Access</legend>
+      <p class="instructions">Use the key below for API access to the tournament. Keep this key in a secure place. If the key has been compromised, you can regenerate it from the tournament settings page.</p>
+      <ol>
+      <li><label for="api_key">API Key: </label>
+      <input type="text" size="30" name="api_key" id="api_key" />
+      <button id="api_generate">Regenerate</button>
+      </li>
+      </ol>
+      </fieldset>
 <p><input type="submit" value="Update" /></p>
 </form>
 <h2>Export</h2>

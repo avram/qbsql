@@ -139,14 +139,19 @@ $(document).ready(function()
 		$("#team1_score").focus();
 		$("#team1_picker").focus();
 		
+		$("#api_generate").click(function() {
+			// Put a new GUID in the API key box
+			$("#api_key").val(generateGUID());
+		});
+		
 		// TUH update
 		$("#total_tuh").change(function() {
 			// Change only if not to the default
-			if($(this).val() != $("#default_tuh").val()) {
+			if($(this).val() !== $("#default_tuh").val()) {
 				// Pull the player TUH fields
 				$(".player_tuh").each(function() {
 					// Set the ones that had been set to old default
-					if($(this).val() == $("#default_tuh").val()) {
+					if($(this).val() === $("#default_tuh").val()) {
 						$(this).val($("#total_tuh").val());
 					}
 				});
@@ -155,9 +160,26 @@ $(document).ready(function()
 	}
 );
 
-// Enable TinyMCE
-$().ready(function() {
-	$('textarea.editor').tinymce({
-		script_url : 'tiny_mce.js'
-	});
-});
+
+	/*
+	 * generates an RFC 4122 compliant random GUID
+	 * Code from Zotero project's Scaffold IDE (GPL/AGPL v3)
+	 */
+	function generateGUID() {
+		var guid = "";
+		for(var i=0; i<16; i++) {
+			var bite = Math.floor(Math.random() * 255);
+
+			if(i == 4 || i == 6 || i == 8 || i == 10) {
+				guid += "-";
+
+				// version
+				if(i == 6) bite = bite & 0x0f | 0x40;
+				// variant
+				if(i == 8) bite = bite & 0x3f | 0x80;
+			}
+			var str = bite.toString(16);
+			guid += str.length == 1 ? '0' + str : str;
+		}
+		return guid;
+	}
