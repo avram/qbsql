@@ -101,11 +101,13 @@ RED;
       </fieldset>
       <fieldset id="api">
       <legend>API Access</legend>
-      <p class="instructions">Use the key below for API access to the tournament. Keep this key in a secure place. If the key has been compromised, you can regenerate it from the tournament settings page.</p>
+      <p class="instructions">Generate a key below for API access to the
+      tournament. Keep this key in a secure place. If the key has been 
+      compromised, you can regenerate it from the tournament settings page.</p>
       <ol>
       <li><label for="api_key">API Key: </label>
       <input type="text" size="30" name="api_key" id="api_key" />
-      <button id="api_generate">Regenerate</button>
+      <input type="button" id="api_generate" value="Generate" />
       </li>
       </ol>
       </fieldset>
@@ -120,7 +122,7 @@ RED;
       <input type="password" size="30" name="master_pw" id="master_pw" tabindex="10" /></li>
       </ol>
       </fieldset>
-      <p><input type="submit" class="wymupdate" value="Add tournament" tabindex="11" /></p>
+      <p><input type="submit" value="Add tournament" tabindex="11" /></p>
      </form>
 <?php
 ?>

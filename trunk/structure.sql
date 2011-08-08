@@ -10,6 +10,7 @@ CREATE TABLE `tournaments` (
       `locked` tinyint(1) NOT NULL default '0',
       `game_length` int(11) NOT NULL default '20',
       `description` text NOT NULL,
+      `api_key` varchar(50) default NULL,
       PRIMARY KEY  (`id`),
       UNIQUE KEY `prefix` (`prefix`)
 );
