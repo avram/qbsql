@@ -10,7 +10,6 @@
 $title="Team statistics";
 $js_includes = true;
  require "head.php";			// Generate header as appropriate
- 
 
  // If they've asked for a team detail, give it to them
  if (isset($_GET["team"]) && is_numeric($_GET["team"])) {
@@ -48,75 +47,6 @@ $js_includes = true;
 ?>
     <h4>Games</h4>
 <?php
-/* Old style. People complained.
-     // Now get the info by round. 
-     $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";
- $detail = ", CONCAT(\"<a href='game_detail.php?game=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Detail</a>\")";
-	// TODO Rewrite to show: Round : Opponent : Result : Score 1 : Score 2 : Margin : P : T : N : BConv : P/N
-     $query="SELECT {$mysql_prefix}_rounds.id,
-			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
-			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND (ISNULL(forfeit) OR forfeit!={$mysql_prefix}_tut1.team_id)),
-			         	{$mysql_prefix}_tut1.team_id,
-			            {$mysql_prefix}_tut2.team_id), '\">', 
-			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND (ISNULL(forfeit) OR forfeit != {$mysql_prefix}_tut1.team_id)),
-			         	t1.full_name,
-			         	t2.full_name),
-			     '</a>') AS name1,
-			    IF(score1>=score2,score1,score2) AS winscore,
-			    FORMAT(IF(score1>=score2,
-			    	(score1-{$mysql_prefix}_tut1.tup)/({$mysql_prefix}_tut1.tuc - {$mysql_prefix}_rounds.ot_tossups1),
-			    	(score2-{$mysql_prefix}_tut2.tup)/({$mysql_prefix}_tut2.tuc - {$mysql_prefix}_rounds.ot_tossups2)),2)
-			    	AS winconv,
-			    CONCAT('<a href=\"stats_team.php?t={$mysql_prefix}&team=',
-			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND (ISNULL(forfeit) OR forfeit !={$mysql_prefix}_tut1.team_id)),
-			         	{$mysql_prefix}_tut2.team_id,
-			            {$mysql_prefix}_tut1.team_id), '\">', 
-			         IF(((score1>=score2 OR forfeit = {$mysql_prefix}_tut2.team_id)
-			         		AND (ISNULL(forfeit) OR forfeit != {$mysql_prefix}_tut1.team_id)),
-			         	t2.full_name,
-			         	t1.full_name),
-			     '</a>') AS name2,
-			    IF(score1>=score2,score2,score1) AS losescore,
-			    FORMAT(IF(score1>=score2,
-			    	(score2-{$mysql_prefix}_tut2.tup)/({$mysql_prefix}_tut2.tuc - {$mysql_prefix}_rounds.ot_tossups2),
-			    	(score1-{$mysql_prefix}_tut1.tup)/({$mysql_prefix}_tut1.tuc - {$mysql_prefix}_rounds.ot_tossups1)),2)
-			    	AS loseconv,
-			    ABS(score1-score2) $detail $edit_query
-			FROM
-                        (
-		    select SUM(powers*15+tossups*10+negs*(-5)) as tup,
-		    SUM(powers+tossups) as tuc,
-		    SUM(powers) as pow,
-		    SUM(negs) AS neg,
-		    team_id, round_id 
-                    from {$mysql_prefix}_teams,{$mysql_prefix}_rounds_players where {$mysql_prefix}_teams.id={$mysql_prefix}_rounds_players.team_id group by round_id,team_id
-                            ) AS {$mysql_prefix}_tut1, 
-                        (
-		    select SUM(powers*15+tossups*10+negs*(-5)) as tup,
-		    SUM(powers+tossups) as tuc,
-		    SUM(powers) as pow,
-		    SUM(negs) AS neg,
-		    team_id, round_id 
-                    from {$mysql_prefix}_teams,{$mysql_prefix}_rounds_players where {$mysql_prefix}_teams.id={$mysql_prefix}_rounds_players.team_id group by round_id,team_id
-                            ) AS {$mysql_prefix}_tut2,
-			    {$mysql_prefix}_rounds, 
-			    {$mysql_prefix}_teams AS t1, {$mysql_prefix}_teams AS t2
-			WHERE t1.id={$mysql_prefix}_rounds.team1
-			    AND t2.id={$mysql_prefix}_rounds.team2
-			    AND {$mysql_prefix}_tut1.round_id={$mysql_prefix}_rounds.id
-			    AND {$mysql_prefix}_tut1.team_id=t1.id
-			    AND {$mysql_prefix}_tut2.round_id={$mysql_prefix}_rounds.id
-                            AND {$mysql_prefix}_tut2.team_id=t2.id
-                            AND (t1.id=$teamid OR t2.id=$teamid)
-			ORDER BY {$mysql_prefix}_rounds.id ASC";
-	 //print "<pre>$query</pre>";
-	 $res1= query($query) or dberror("Error on team detail",$query);
-     table($res1,array("Round","W","","BConv","L","","BConv","Margin","Detail"),9,TRUE,FALSE,"stats",array("sort"=>""));
-     free_result($res1);
- */ 
      // This is the not so pretty yet new style that people wanted.
      // Now get the info by round. 
      $edit_query = ($auth) ? ", concat(\"<a href='add_game.php?edit=\",{$mysql_prefix}_rounds.game_id,\"&t=$mysql_prefix'>Edit</a>\")" : "";
